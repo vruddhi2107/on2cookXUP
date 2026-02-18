@@ -231,7 +231,7 @@ function selectLead(id) {
 function buildScoreFormHTML(lead) {
   const scripts = {
     motivation: {
-      title: '🧠 PART 2: Motivation & Intent',
+      title: '🧠 PART 2: Motivation & Ownership',
       ask:   ['What made you apply?', 'Working, studying, or full-time?', 'Who will run it day-to-day?'],
       flag:  'I applied because someone told me to try'
     },
@@ -273,8 +273,10 @@ function buildScoreFormHTML(lead) {
     <div class="scoring-container">
       <div class="script-column">
         <div class="info-card">
-          <h3>🧾 On2Cook Offering</h3>
-          <p>Explain: Training, Smart System (Induction+Microwave), Menu support, Setup guidance, District support.</p>
+          <h3>🧾 The "Must-Have" Check</h3>
+          <p>Residence: Is the person a permanent resident of Uttar Pradesh?<br/>
+          Age: Is the person between 21 and 40 years old?<br/>
+          Loan: Is the person willing to take a ₹5 Lakh bank loan? (Must not expect a 100% free grant).</p>
         </div>
         ${Object.entries(scripts).map(([, s]) => `
           <div class="script-section">
