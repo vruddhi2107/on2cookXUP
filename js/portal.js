@@ -35,11 +35,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── SUPABASE SCORES ────────────────────────────────────────────
 async function loadScoredFromDB() {
-  const { data } = await db.from('scored_leads').select('*');
-  // Store all leads in scoredMap
+  const { data, error } = await db.from('scored_leads').select('*');
+  if (error) {
+    console.error("Error fetching scores:", error);
+    return;
+  }
+  // Map lead_id to the full row object so dashboard can see scores, flags, and status
   State.scoredMap = data.reduce((acc, row) => {
-    // Only put them in the scored list if they have actual scores
-    if (row.total > 0) acc[row.lead_id] = row;
+    acc[row.lead_id] = row;
     return acc;
   }, {});
 }
@@ -50,26 +53,38 @@ async function loadScoredFromDB() {
 async function loadLeads() {
   setSyncStatus('Fetching leads...');
   try {
-    const { data, error } = await db
-      .from('scored_leads')
-      .select('*')
-      .range(0, 5000); // Increased limit
+    const PAGE_SIZE = 1000;
+    let allData = [];
+    let from = 0;
+    let keepFetching = true;
 
-    if (error) throw error;
+    while (keepFetching) {
+      const { data, error } = await db
+        .from('scored_leads')
+        .select('*')
+        .range(from, from + PAGE_SIZE - 1);
 
-    State.leads = data.map(row => ({
-      ...row,
-      id: row.lead_id
-    }));
+      if (error) throw error;
+
+      allData = allData.concat(data);
+
+      // If we got fewer rows than PAGE_SIZE, we've hit the end
+      if (data.length < PAGE_SIZE) {
+        keepFetching = false;
+      } else {
+        from += PAGE_SIZE;
+      }
+    }
+
+    State.leads = allData.map(row => ({ ...row, id: row.lead_id }));
 
     setSyncStatus(`Synced · ${State.leads.length} leads`);
-    populateFilters(); 
-    
-    // Only auto-render the grid if we are actually on the leads tab
+    populateFilters();
+
     if (State.activeTab === 'leads') {
-        renderLeadGrid(); 
+      renderLeadGrid();
     } else if (State.activeTab === 'dashboard') {
-        renderDashboard();
+      renderDashboard();
     }
   } catch (err) {
     console.error('loadLeads error:', err);
@@ -393,23 +408,104 @@ function renderContentPanel(mode) {
 
 // ── SCORE FORM HTML ────────────────────────────────────────────
 function buildScoreFormHTML(lead) {
+  // Define the content for the sections based on your requirements
+  const scripts = {
+    motivation: {
+      title: "🧠 PART 2: Motivation & Intent",
+      ask: ["What made you apply?", "Working, studying, or full-time?", "Who will run it day-to-day?"],
+      flags: "I applied because someone told me to try"
+    },
+    ops: {
+      title: "🍽️ PART 3: Food & Ops Readiness",
+      ask: ["Experience in cooking/handling?", "Where will you operate?", "Comfortable with early/late hours?"],
+      flags: "Wants income but no daily involvement"
+    },
+    finance: {
+      title: "💰 PART 4: Financial & Bank Readiness",
+      ask: ["Comfortable with CM Yuva loan?", "Aadhaar/PAN ready?", "Can arrange 5-10% margin?"],
+      flags: "Wants machine without loan process"
+    },
+    mindset: {
+      title: "⚡ PART 5: Business Mindset",
+      ask: ["Income aim for Year 1?", "Open to learning hygiene/costing?", "Interested in scaling up?"],
+      flags: "Fixed expectations, resistant to training"
+    }
+  };
+
   return `
   <div class="lead-detail-view">
     <div class="detail-header">
-      <button class="back-btn" onclick="renderLeadGrid()">← Back to Grid</button>
-      <div class="header-main">
-        <div>
-          <h1 class="detail-name">${lead.full_name}</h1>
-          <div class="detail-meta">
-            <span>📞 ${lead.phone_number}</span> | <span>📍 ${lead.target_city || '—'}</span> | <span>👥 Team Member: ${lead.lead_alloc || 'Unassigned'}</span>
+      <div class="header-left">
+        <button class="back-btn" onclick="renderLeadGrid()">← Back to Grid</button>
+        <h1 class="detail-name">${lead.full_name}</h1>
+        <div class="detail-meta">
+          <span>📞 ${lead.phone_number}</span> | <span>📍 ${lead.target_city || '—'}</span> | <span>👥 Team Member: ${lead.lead_alloc || 'Unassigned'}</span>
+        </div>
+      </div>
+      <div id="score-summary" class="summary-badge">
+          <div id="sum-num">0</div>
+          <div id="sum-status">PENDING</div>
+      </div>
+    </div>
+
+    <div class="scoring-container">
+      <div class="script-column">
+        <div class="info-card onboarding">
+          <h3>🧾 PART 6: On2Cook Offering</h3>
+          <p>Explain clearly: Training, Smart System (Induction+MW), Menu support, Setup guidance, and District support.</p>
+        </div>
+
+        ${Object.entries(scripts).map(([key, data]) => `
+          <div class="script-section">
+            <h4>${data.title}</h4>
+            <ul>${data.ask.map(q => `<li>${q}</li>`).join('')}</ul>
+            <div class="script-flag">🚩 ${data.flags}</div>
           </div>
-        </div>
-        <div id="score-summary" class="summary-badge">
-           <div id="sum-num">0</div>
-           <div id="sum-status">PENDING</div>
+        `).join('')}
+
+        <div class="info-card closure">
+          <h3>🧮 PART 7: Final Step</h3>
+          <p>If >20: "You seem like a fast-track candidate. Next: Bank orientation."</p>
         </div>
       </div>
+
+      <div class="input-column">
+        <div class="scoring-board">
+          ${SECTIONS.map(sec => `
+            <div class="score-card">
+              <div class="card-head">
+                <span class="sec-title">${sec.title}</span>
+                <span class="sec-val" id="val-${sec.id}">0pts</span>
+              </div>
+              <div class="radio-group">
+                <label class="radio-face"><input type="radio" name="sec-${sec.id}" value="5" onclick="onScoreChange('${sec.id}', 5)"> 5 (Strong)</label>
+                <label class="radio-face"><input type="radio" name="sec-${sec.id}" value="3" onclick="onScoreChange('${sec.id}', 3)"> 3 (Average)</label>
+                <label class="radio-face"><input type="radio" name="sec-${sec.id}" value="1" onclick="onScoreChange('${sec.id}', 1)"> 1 (Weak)</label>
+              </div>
+            </div>
+          `).join('')}
+
+          <div class="flags-card">
+            <h4>🚩 Mandatory Red Flags</h4>
+            <div class="flag-list">
+              ${RED_FLAGS.map((f, i) => `
+                <label class="flag-pill" id="flag-label-${i}">
+                  <input type="checkbox" onchange="onFlagChange(${i}, this.checked)"> ${f}
+                </label>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="notes-card">
+            <textarea id="caller-notes" placeholder="Internal Team Member notes...">${State.currentNotes || ''}</textarea>
+          </div>
+
+          <button id="save-btn" class="save-btn disabled" onclick="saveLead()">
+            Score all sections to save
+          </button>
+        </div>
       </div>
+    </div>
   </div>`;
 }
 
@@ -584,10 +680,10 @@ function renderDashboard() {
   const scoredLeads = Object.values(State.scoredMap);
   const totalLeads = State.leads.length;
 
-  // Data Aggregator Helper
-  const getStatArray = (key, dataSource = State.leads) => {
+  // Helper for counting unique values in the main pipeline
+  const getStatArray = (key) => {
     const counts = {};
-    dataSource.forEach(l => {
+    State.leads.forEach(l => {
       const val = l[key] || 'Not Specified';
       counts[val] = (counts[val] || 0) + 1;
     });
@@ -606,13 +702,12 @@ function renderDashboard() {
       </div>
 
       <div class="dash-grid">
-        
         <div class="dash-col">
           <section class="dash-card">
             <h3>Qualification Success</h3>
             ${renderProgressBar('Fast-Track', scoredLeads.filter(l => l.status === 'fast-track').length, scoredLeads.length, '#16a34a')}
             ${renderProgressBar('Nurture', scoredLeads.filter(l => l.status === 'nurture').length, scoredLeads.length, '#d97706')}
-            ${renderProgressBar('Rejected', scoredLeads.filter(l => ['auto-reject', 'not-suitable'].includes(l.status)).length, scoredLeads.length, '#dc2626')}
+            ${renderProgressBar('Rejected', scoredLeads.filter(l => ['auto-reject', 'not-suitable', 'rejected'].includes(l.status)).length, scoredLeads.length, '#dc2626')}
           </section>
 
           <section class="dash-card">
@@ -623,15 +718,6 @@ function renderDashboard() {
               `).join('')}
             </div>
           </section>  
-
-          <section class="dash-card">
-            <h3>Intent & Purpose Breakdown</h3>
-            <div class="stat-list">
-              ${getStatArray('intent_purpose').slice(0, 5).map(([name, count]) => `
-                <div class="stat-row"><span>${name}</span><b>${count}</b></div>
-              `).join('')}
-            </div>
-          </section>
 
           <section class="dash-card">
             <h3>Time Commitment</h3>
@@ -654,25 +740,12 @@ function renderDashboard() {
           </section>
 
           <section class="dash-card">
-            <h3>Education & Demographics</h3>
-            <div class="dual-stat">
-              <div>
-                <small>Education Level</small>
-                ${getStatArray('education_level').slice(0, 4).map(([name, count]) => `<div class="mini-row">${name}: <b>${count}</b></div>`).join('')}
-              </div>
-              <div>
-                <small>Gender/Age</small>
-                ${getStatArray('gender').map(([name, count]) => `<div class="mini-row">${name}: <b>${count}</b></div>`).join('')}
-              </div>
-            </div>
-          </section>
-
-          <section class="dash-card">
             <h3>Score Analysis (Section Averages)</h3>
             <div class="stat-list">
               ${SECTIONS.map(sec => {
+                // Extracts from the 'scores' jsonb field in your schema
                 const vals = scoredLeads.map(l => l.scores?.[sec.id]).filter(v => v != null);
-                const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '0.0';
+                const avg = vals.length ? (vals.reduce((a, b) => Number(a) + Number(b), 0) / vals.length).toFixed(1) : '0.0';
                 return `<div class="stat-row"><span>${sec.title}</span><b style="color:var(--red)">${avg} / 5.0</b></div>`;
               }).join('')}
             </div>
@@ -681,12 +754,17 @@ function renderDashboard() {
           <section class="dash-card">
             <h3>Risk Factor (Flags)</h3>
             <div class="stat-list">
-               <div class="stat-row"><span>Leads with Red Flags</span><b>${scoredLeads.filter(l => l.flag_count > 0).length}</b></div>
-               <div class="stat-row"><span>Clean Leads</span><b>${scoredLeads.filter(l => l.flag_count === 0).length}</b></div>
+               <div class="stat-row">
+                 <span>Flagged Leads</span>
+                 <b style="color:var(--red)">${scoredLeads.filter(l => (l.flag_count || 0) > 0).length}</b>
+               </div>
+               <div class="stat-row">
+                 <span>Clean Leads</span>
+                 <b style="color:#16a34a">${scoredLeads.filter(l => (l.flag_count || 0) === 0).length}</b>
+               </div>
             </div>
           </section>
         </div>
-
       </div>
     </div>
   `;
