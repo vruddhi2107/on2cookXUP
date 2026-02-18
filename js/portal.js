@@ -231,22 +231,22 @@ function selectLead(id) {
 function buildScoreFormHTML(lead) {
   const scripts = {
     motivation: {
-      title: '🧠 PART 2: Motivation & Ownership',
-      ask:   ['What made you apply?', 'Working, studying, or full-time?', 'Who will run it day-to-day?'],
+      title: '🧠 PART 1: Motivation & Ownership',
+      ask:   ['What made you apply?', 'Working, studying, or full-time?', 'Why this business, and will you run it full-time yourself?'],
       flag:  'I applied because someone told me to try'
     },
     ops: {
-      title: '🍽️ PART 3: Food & Ops Readiness',
+      title: '🍽️ PART 2: Food & Ops Readiness',
       ask:   ['Experience in cooking/handling?', 'Where will you operate?', 'Comfortable with early/late hours?'],
       flag:  'Wants income but no daily involvement'
     },
     finance: {
-      title: '💰 PART 4: Financial & Bank Readiness',
+      title: '💰 PART 3: Financial & Bank Readiness',
       ask:   ['Comfortable with CM Yuva loan?', 'Aadhaar/PAN ready?', 'Can arrange 5–10% margin?'],
       flag:  'Wants machine without loan process'
     },
     mindset: {
-      title: '⚡ PART 5: Business Mindset',
+      title: '⚡ PART 4: Business Mindset',
       ask:   ['Income aim for Year 1?', 'Open to learning hygiene/costing?', 'Interested in scaling up?'],
       flag:  'Fixed expectations, resistant to training'
     }
