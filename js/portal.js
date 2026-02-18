@@ -273,8 +273,8 @@ function buildScoreFormHTML(lead) {
     <div class="scoring-container">
       <div class="script-column">
         <div class="info-card">
-          <h3>🧾 PART 6: On2Cook Offering</h3>
-          <p>Explain: Training, Smart System (Induction+MW), Menu support, Setup guidance, District support.</p>
+          <h3>🧾 On2Cook Offering</h3>
+          <p>Explain: Training, Smart System (Induction+Microwave), Menu support, Setup guidance, District support.</p>
         </div>
         ${Object.entries(scripts).map(([, s]) => `
           <div class="script-section">
@@ -283,11 +283,7 @@ function buildScoreFormHTML(lead) {
             <div class="script-flag">🚩 ${s.flag}</div>
           </div>
         `).join('')}
-        <div class="info-card">
-          <h3>🧮 PART 7: Final Step</h3>
-          <p>If &gt;20: "You seem like a fast-track candidate. Next: Bank orientation."</p>
-        </div>
-      </div>
+       </div>
 
       <div class="input-column">
         <div class="scoring-board">
