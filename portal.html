@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lead Portal — CM Yuva × On2Cook</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/portal.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Supabase CDN (no npm needed for frontend) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+
+      <!-- LOGO (replace placeholder) -->
+      <div class="portal-logo">
+        <!--
+          Replace with:
+            <img src="assets/logo.png" alt="Your Brand" class="portal-logo-img" />
+        -->
+        <div class="portal-logo-placeholder">LOGO</div>
+        <div class="portal-logo-sep"></div>
+        <span class="portal-logo-name">CM Yuva × On2Cook</span>
+      </div>
+
+      <div class="tab-sep"></div>
+
+      <div class="tab-bar">
+        <button class="tab active" id="tab-leads"     onclick="switchTab('leads')">Leads</button>
+        <button class="tab" id="tab-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleExcelImport(event)" />
+      
+      <button class="icon-btn" onclick="document.getElementById('excel-upload').click()">
+        📤 Import Excel
+      </button>
+
+      <div class="sync-indicator">
+        <span class="live-dot"></span>
+        <span id="sync-status">Connecting...</span>
+      </div>
+      <button class="icon-btn" onclick="refreshAll()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <!-- ── MAIN BODY ── -->
+  <div class="main-body">
+
+   <div class="full-width-container">
+    <div class="grid-controls">
+      <input type="text" id="search-input" placeholder="Search leads..." oninput="renderLeadGrid()">
+      <select id="filter-city" onchange="renderLeadGrid()"></select>
+      <select id="filter-alloc" onchange="renderLeadGrid()"></select>
+      <select id="filter-platform" onchange="renderLeadGrid()"></select>
+      <div id="leads-meta" class="meta-count"></div>
+    </div>
+
+    <!-- ── CONTENT PANEL ── -->
+    <div class="content-panel" id="content-panel">
+      <div class="empty-state">
+        <div class="empty-icon">⟳</div>
+        <div class="empty-title">Loading...</div>
+        <div class="empty-sub">Connecting to backend and Supabase</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts (order matters) -->
+<script src="js/config.js"></script>
+<script src="js/db.js"></script>
+<script src="js/dashboard.js"></script> <script src="js/portal.js"></script>
+
+</body>
+</html>
