@@ -310,12 +310,14 @@ function buildScoreFormHTML(lead) {
     <div class="detail-header">
       <div class="header-left">
         <button class="back-btn" onclick="renderLeadGrid()">← Back to Grid</button>
-        <h1 class="detail-name">${lead.full_name || '—'}</h1>
+        <h1 class="detail-name">${lead.full_name || '—'} | ${lead.age} | ${lead.gender} | ${lead.education_level}</h1>
         <div class="detail-meta">
           <span>📞 ${lead.phone_number || '—'}</span> |
+          <span>📧 ${lead.email || '—'}</span> |
           <span>📍 ${lead.target_city || '—'}</span> |
           <span>👥 ${lead.lead_alloc || 'Unassigned'}</span> |
-          <span>${lead.intent_purpose || 'Unassigned'}</span>
+          <span> Who is this for? ${lead.intent_purpose || 'Unassigned'}</span> |
+          <span> Ready to run a food business? ${lead.time_commitment || 'Unassigned'}</span>
         </div>
       </div>
       <div id="score-summary" class="summary-badge" style="display:none;">
