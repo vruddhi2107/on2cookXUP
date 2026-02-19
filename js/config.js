@@ -3,13 +3,13 @@
 // Paste your Supabase credentials below (anon key is safe to expose)
 // ═══════════════════════════════════════════════════════════════
 
-// const SUPABASE_URL      = 'https://wwtjhzwzzkwvzjtybygg.supabase.co';
-// const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3dGpoend6emt3dnpqdHlieWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzOTQwMzcsImV4cCI6MjA4Njk3MDAzN30.Qy7c5CUil7hSzJv3MVPHghYoeFdDBG_nULqaccFSj5Q'; // ← paste your anon key
+const SUPABASE_URL      = 'https://wwtjhzwzzkwvzjtybygg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3dGpoend6emt3dnpqdHlieWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzOTQwMzcsImV4cCI6MjA4Njk3MDAzN30.Qy7c5CUil7hSzJv3MVPHghYoeFdDBG_nULqaccFSj5Q'; // ← paste your anon key
 
-// // Init Supabase client immediately
-// const { createClient } = supabase;
-// // Use let so it can be initialized or overwritten if needed
-// let db = null; 
+// Init Supabase client immediately
+const { createClient } = supabase;
+// Use let so it can be initialized or overwritten if needed
+let db = null; 
 
 try {
     db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
