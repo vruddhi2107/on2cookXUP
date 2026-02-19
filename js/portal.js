@@ -628,12 +628,12 @@ async function processExcelToSupabase(rows) {
     if (!id) return;
     map.set(id, {
       lead_id:         id,
-      full_name:       row.full_name       || row.Name            || 'Unknown',
-      phone_number:    row.phone_number    || row.Phone            || '',
-      city:            row.city            || row.City             || '—',
+      full_name:       row.full_name       || row.Name          || 'Unknown',
+      phone_number:    row.phone_number    || row.Phone         || '',
+      city:            row.city            || row.City          || '—',
       email:           row.email           || '',
       gender:          row.Lead_Gender     || '',
-      dob:             row.date_of_birth   || row.Formatted_Date   || '',
+      dob:             row.date_of_birth   || row.Formatted_Date || '',
       education_level: row.education_level || '',
       age:             row.Age             || '',
       ad_name:         row.ad_name         || '',
@@ -642,14 +642,21 @@ async function processExcelToSupabase(rows) {
       time_commitment: row['क्या_आप_अपने_फूड_बिज़नेस_को_समय_देने_के_लिए_तैयार_हैं?'] || '',
       target_city:     row.Target_City     || '',
       lead_alloc:      row.Lead_Allocation || 'Unassigned',
-      status:          'Open',
+      // ✅ DO NOT include status/notes/scores/flags/total here
+      // They default to DB defaults on first insert,
+      // and are ignored on conflict (existing rows keep their scored data)
       updated_at:      new Date().toISOString()
     });
   });
 
   const leads = Array.from(map.values());
   try {
-    const { error } = await _db.from('scored_leads').upsert(leads, { onConflict: 'lead_id' });
+    const { error } = await _db
+      .from('scored_leads')
+      .upsert(leads, { 
+        onConflict: 'lead_id',
+        ignoreDuplicates: true  // ✅ For import: skip rows that already exist
+      });
     if (error) throw error;
     showToast(`✓ ${leads.length} leads imported`, 'success');
     refreshAll();
@@ -658,7 +665,6 @@ async function processExcelToSupabase(rows) {
     showToast('Upload error: ' + err.message, 'error');
   }
 }
-
 // ── HELPERS ────────────────────────────────────────────────────
 function setSyncStatus(msg) {
   const el = document.getElementById('sync-status');
