@@ -4,272 +4,715 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CM Yuva × On2Cook — Lead Intelligence System</title>
-
-  <!-- ── OG / Social ── -->
   <meta property="og:title"       content="CM Yuva × On2Cook — Lead Intelligence System" />
-  <meta property="og:description" content="A structured franchise lead qualification portal. Score prospects in real-time. 5 sections · 25 points · Supabase-powered." />
+  <meta property="og:description" content="A structured franchise lead qualification portal. Score prospects in real-time. 5 sections · 20 points · Supabase-powered." />
   <meta property="og:image"       content="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/CMYUVA%20post_1200x630.jpg" />
   <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="https://on2cook-up-yuva-abhiyan.vercel.app/" />
+  <link rel="icon" href="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/on2cook%20favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <!-- ── Twitter Card ── -->
-  <meta name="twitter:card"        content="summary" />
-  <meta name="twitter:title"       content="CM Yuva × On2Cook — Lead Intelligence System" />
-  <meta name="twitter:description" content="Qualify smarter. Scale faster. Real-time lead scoring for the On2Cook Food Business Program." />
-  <meta name="twitter:image"       content="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/CMYUVA%20post_1200x630.jpg" />
+<style>
+:root {
+  --black:   #060608;
+  --bg-1:    #0d0d10;
+  --bg-2:    #111115;
+  --red:     #e02020;
+  --green:   #16a34a;
+  --amber:   #d97706;
+  --text-primary:   #f0eff2;
+  --text-secondary: #8a8898;
+  --text-muted:     #55546a;
+  --text-faint:     #2e2d3a;
+  --text-ghost:     #1a1a24;
+  --border-1: rgba(255,255,255,0.055);
+  --border-2: rgba(255,255,255,0.10);
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --font-deva:  'Noto Sans Devanagari', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--black); color: var(--text-primary);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.6;
+  overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+body.lang-hi { font-family: var(--font-deva); }
+a { color: inherit; text-decoration: none; }
 
-  <!-- ── Favicon ── -->
-<link rel="icon" href="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/on2cook%20favicon.png" type="image/png">
-  <link rel="stylesheet" href="/css/base.css" />
-  <link rel="stylesheet" href="/css/index.css" />
+/* BUTTONS */
+.btn-red {
+  display: inline-block; background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 11px 26px; cursor: pointer; border: none;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-red:hover { background: #c01a1a; transform: translateY(-1px); }
+.btn-outline {
+  display: inline-block; border: 1px solid var(--border-2); color: var(--text-secondary);
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 10px 22px; transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+
+/* LANG TOGGLE */
+.lang-toggle {
+  display: flex; align-items: center;
+  border: 1px solid var(--border-2); overflow: hidden;
+}
+.lang-toggle button {
+  background: none; border: none; color: var(--text-muted);
+  padding: 8px 13px; cursor: pointer;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: inherit; transition: background 0.15s, color 0.15s;
+}
+.lang-toggle button.active { background: var(--red); color: #fff; }
+
+/* NAV */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px;
+  background: rgba(6,6,8,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-1);
+}
+.nav-brand { display: flex; align-items: center; gap: 16px; }
+.nav-sep { width: 1px; height: 28px; background: var(--border-2); }
+.nav-wordmark { display: flex; flex-direction: column; gap: 1px; }
+.nav-wordmark-top { font-size: 10px; font-weight: 500; color: var(--text-primary); letter-spacing: 0.05em; }
+.nav-wordmark-sub { font-size: 8px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.nav-red-accent { position: absolute; bottom: 0; left: 0; width: 120px; height: 1px; background: linear-gradient(to right, var(--red), transparent); }
+
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 80px 48px 80px; position: relative; z-index: 1; overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image: linear-gradient(var(--border-1) 1px, transparent 1px), linear-gradient(90deg, var(--border-1) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 90% at 85% 50%, black 0%, transparent 70%);
+}
+.hero-glow { position: absolute; top: 20%; right: 10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(224,32,32,0.07) 0%, transparent 70%); z-index: 0; }
+.hero-corner { position: absolute; top: 56px; right: 0; width: 3px; height: 200px; background: linear-gradient(to bottom, var(--red), transparent); }
+.hero-ticker {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 7px 14px; border: 1px solid var(--border-2);
+  font-size: 10px; color: var(--text-muted); width: fit-content; margin-bottom: 28px;
+  background: rgba(0,0,0,0.5); position: relative; z-index: 1;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex-shrink: 0; animation: pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+.hero-eyebrow {
+  font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--red); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 14px; position: relative; z-index: 1;
+}
+.hero-eyebrow::before { content: ''; display: inline-block; width: 48px; height: 2px; background: var(--red); }
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(56px, 8.5vw, 112px); font-weight: 900; line-height: 0.92;
+  letter-spacing: -0.03em; margin-bottom: 32px; max-width: 900px; position: relative; z-index: 1;
+}
+.hero-title em { font-style: italic; color: var(--text-muted); }
+.hero-title .accent { color: var(--red); }
+.hero-subtitle { font-size: 13px; color: var(--text-secondary); line-height: 1.8; max-width: 480px; margin-bottom: 44px; position: relative; z-index: 1; }
+.hero-actions { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; flex-wrap: wrap; }
+.hero-stats { position: absolute; right: 48px; bottom: 80px; z-index: 1; display: flex; flex-direction: column; align-items: flex-end; }
+.hero-stat-item { text-align: right; padding: 18px 0; }
+.hero-stat-item + .hero-stat-item { border-top: 1px solid var(--border-1); }
+.hero-stat-num { font-family: var(--font-serif); font-size: 42px; font-weight: 900; line-height: 1; color: var(--text-primary); }
+.hero-stat-num.red { color: var(--red); }
+.hero-stat-label { font-size: 8px; color: var(--text-muted); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 3px; }
+
+/* MARQUEE */
+.marquee-track {
+  border-top: 1px solid var(--border-1); border-bottom: 1px solid var(--border-1);
+  overflow: hidden; padding: 12px 0; background: var(--bg-1); position: relative;
+}
+.marquee-track::before,.marquee-track::after { content: ''; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 2; }
+.marquee-track::before { left: 0; background: linear-gradient(to right, var(--bg-1), transparent); }
+.marquee-track::after  { right: 0; background: linear-gradient(to left, var(--bg-1), transparent); }
+.marquee-inner { display: flex; animation: marquee 28s linear infinite; white-space: nowrap; }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.marquee-item { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; padding: 0 32px; flex-shrink: 0; border-right: 1px solid var(--border-1); }
+.m-dot { width: 4px; height: 4px; background: var(--red); border-radius: 50%; margin-right: 14px; flex-shrink: 0; }
+.marquee-item.hl { color: var(--red); }
+
+/* SECTIONS */
+.section { padding: 96px 48px; position: relative; z-index: 1; }
+.section + .section { border-top: 1px solid var(--border-1); }
+.section-header { margin-bottom: 56px; }
+.section-eyebrow { font-size: 9px; color: var(--red); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; font-family: var(--font-sans); }
+.eyebrow-num { color: var(--text-faint); }
+.section-title { font-family: var(--font-serif); font-size: clamp(28px, 4vw, 48px); font-weight: 900; letter-spacing: -0.025em; color: var(--text-primary); }
+.section-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.75; max-width: 580px; margin-top: 14px; }
+
+/* OVERVIEW */
+.overview-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border-1); }
+.overview-card {
+  background: var(--black); padding: 40px 36px; position: relative; overflow: hidden; transition: background 0.2s;
+}
+.overview-card:hover { background: var(--bg-1); }
+.overview-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, var(--red), transparent); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+.overview-card:hover::before { transform: scaleX(1); }
+.ov-icon { font-size: 28px; margin-bottom: 18px; display: block; }
+.ov-title { font-family: var(--font-serif); font-size: 22px; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); }
+.ov-body { font-size: 12px; color: var(--text-secondary); line-height: 1.85; }
+.ov-tag { display: inline-block; margin-top: 18px; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid var(--border-2); color: var(--text-muted); padding: 5px 12px; font-family: var(--font-sans); }
+
+/* BENEFITS */
+.benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-1); }
+.benefit-card { background: var(--black); padding: 32px 28px; display: flex; flex-direction: column; transition: background 0.2s; }
+.benefit-card:hover { background: var(--bg-2); }
+.benefit-num { font-family: var(--font-serif); font-size: 52px; font-weight: 900; color: var(--text-ghost); line-height: 1; margin-bottom: 16px; }
+.benefit-icon { font-size: 20px; margin-bottom: 14px; }
+.benefit-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+.benefit-body { font-size: 11px; color: var(--text-secondary); line-height: 1.8; flex: 1; }
+.benefit-pill { display: inline-block; margin-top: 16px; background: rgba(224,32,32,0.1); color: var(--red); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border: 1px solid rgba(224,32,32,0.2); width: fit-content; font-family: var(--font-sans); }
+
+/* EARNINGS */
+.earnings-section { padding: 0 48px 96px; border-top: 1px solid var(--border-1); background: var(--bg-1); position: relative; overflow: hidden; }
+.earnings-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, var(--red), transparent); }
+.earnings-inner { padding-top: 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+.earnings-big { font-family: var(--font-serif); font-size: clamp(56px, 7vw, 96px); font-weight: 900; line-height: 1; color: var(--red); margin-bottom: 8px; }
+.earnings-label { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.08em; margin-bottom: 28px; }
+.earnings-breakdown { display: flex; flex-direction: column; gap: 1px; background: var(--border-1); margin-top: 32px; }
+.earn-row { display: flex; justify-content: space-between; align-items: center; background: var(--black); padding: 14px 18px; }
+.earn-row-label { font-size: 11px; color: var(--text-secondary); }
+.earn-row-val { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.earnings-disclaimer { font-size: 9px; color: var(--text-muted); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-1); letter-spacing: 0.04em; }
+.earnings-note { font-size: 12px; color: var(--text-secondary); line-height: 1.85; }
+
+/* WHO IS IT FOR */
+.who-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border-1); }
+.who-card { background: var(--black); padding: 36px 32px; }
+.who-card.yes { border-left: 3px solid var(--green); }
+.who-card.no  { border-left: 3px solid var(--red); }
+.who-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px; font-family: var(--font-sans); }
+.who-card.yes .who-label { color: var(--green); }
+.who-card.no  .who-label { color: var(--red); }
+.who-list { display: flex; flex-direction: column; gap: 10px; }
+.who-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.65; }
+.who-item::before { flex-shrink: 0; margin-top: 2px; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; font-family: var(--font-sans); }
+.who-card.yes .who-item::before { content: '✓'; background: rgba(22,163,74,0.12); color: var(--green); }
+.who-card.no  .who-item::before { content: '✕'; background: rgba(224,32,32,0.10); color: var(--red); }
+
+/* APPLY STEPS */
+.apply-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border-1); }
+.apply-step { background: var(--black); padding: 36px 28px; position: relative; transition: background 0.2s; }
+.apply-step:hover { background: var(--bg-2); }
+.apply-step-num { font-family: var(--font-serif); font-size: 60px; font-weight: 900; color: var(--text-ghost); line-height: 1; margin-bottom: 18px; }
+.apply-step-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+.apply-step-body { font-size: 11px; color: var(--text-secondary); line-height: 1.75; }
+.apply-step::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--red); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+.apply-step:hover::after { transform: scaleX(1); }
+
+/* RUBRIC */
+.rubric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-1); }
+.rubric-card { background: var(--black); padding: 28px 24px; }
+.rubric-part { font-size: 9px; color: var(--red); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; font-family: var(--font-sans); }
+.rubric-name { font-size: 13px; font-weight: 500; margin-bottom: 14px; color: var(--text-primary); }
+.rubric-scores { display: flex; flex-direction: column; gap: 6px; }
+.rubric-score { display: flex; align-items: center; gap: 10px; font-size: 10px; color: var(--text-secondary); padding: 7px 10px; border: 1px solid var(--border-1); }
+.score-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; font-family: var(--font-sans); }
+.rubric-card.danger { background: #050001; border-top: 2px solid var(--red); }
+.danger-flags { display: flex; flex-direction: column; gap: 6px; }
+.danger-flag { font-size: 10px; color: rgba(220,38,38,0.65); display: flex; align-items: center; gap: 8px; }
+.danger-flag::before { content: '✕'; font-size: 9px; color: var(--red); font-family: var(--font-sans); }
+
+/* STATUS */
+.status-section { padding: 80px 48px; border-top: 1px solid var(--border-1); }
+.status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-1); }
+.status-card { background: var(--black); padding: 40px 32px; position: relative; }
+.status-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.status-card.green::before { background: var(--green); }
+.status-card.amber::before { background: var(--amber); }
+.status-card.red::before   { background: var(--red); }
+.status-range { font-family: var(--font-serif); font-size: 44px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+.status-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; font-family: var(--font-sans); }
+.status-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.75; }
+
+/* CTA */
+.cta-section {
+  padding: 120px 48px; position: relative; border-top: 1px solid var(--border-1);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; background: var(--bg-1);
+}
+.cta-section::before { content: ''; position: absolute; top: 0; left: 0; width: 200px; height: 2px; background: linear-gradient(to right, var(--red), transparent); }
+.cta-title { font-family: var(--font-serif); font-size: clamp(40px, 5.5vw, 76px); font-weight: 900; letter-spacing: -0.03em; line-height: 0.92; }
+.cta-title em { font-style: italic; color: var(--text-muted); }
+.cta-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+.cta-note { font-size: 10px; color: var(--text-secondary); text-align: right; max-width: 280px; line-height: 1.7; }
+
+/* FOOTER */
+.sitefooter { padding: 36px 48px; border-top: 1px solid var(--border-1); display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-info { font-size: 10px; color: var(--text-secondary); line-height: 1.6; }
+.footer-info strong { color: var(--text-primary); }
+.footer-right { text-align: right; }
+.footer-right p { font-size: 9px; color: var(--text-muted); letter-spacing: 0.1em; margin-top: 4px; }
+.footer-red-line { width: 40px; height: 2px; background: var(--red); margin-left: auto; margin-bottom: 10px; }
+
+/* FADE-UP */
+.fade-up { opacity: 0; transform: translateY(24px); animation: fadeUp 0.7s ease forwards; }
+.fade-up:nth-child(1){animation-delay:0.1s} .fade-up:nth-child(2){animation-delay:0.22s}
+.fade-up:nth-child(3){animation-delay:0.36s} .fade-up:nth-child(4){animation-delay:0.5s} .fade-up:nth-child(5){animation-delay:0.64s}
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* BENTO BOXES for earnings */
+.biz-box { display: flex; flex-direction: column; gap: 1px; background: var(--border-1); margin-top: 32px; }
+.biz-row { background: var(--black); padding: 22px 24px; }
+.biz-row-tag { font-size: 9px; color: var(--red); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; font-family: var(--font-sans); }
+.biz-row-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 5px; }
+.biz-row-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.7; }
+
+@media (max-width: 960px) {
+  .hero { padding: 80px 24px 60px; }
+  .hero-stats { display: none; }
+  .section { padding: 60px 24px; }
+  .earnings-section { padding: 0 24px 60px; }
+  .status-section { padding: 60px 24px; }
+  .cta-section { padding: 60px 24px; flex-direction: column; }
+  .cta-right { align-items: flex-start; }
+  .cta-note { text-align: left; }
+  .sitefooter { flex-direction: column; padding: 32px 24px; }
+  .footer-right { text-align: left; }
+  .footer-red-line { margin-left: 0; }
+  .overview-grid, .who-grid { grid-template-columns: 1fr; }
+  .benefits-grid { grid-template-columns: 1fr 1fr; }
+  .rubric-grid { grid-template-columns: 1fr; }
+  .status-grid { grid-template-columns: 1fr; }
+  .apply-steps { grid-template-columns: 1fr 1fr; }
+  .earnings-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+@media (max-width: 560px) {
+  .benefits-grid, .apply-steps, .who-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
 
-  <!-- ── NAV ── -->
-  <nav class="topnav">
-    <div class="nav-brand">
-      <!--
-        LOGO INSTRUCTIONS:
-        Replace the placeholder below with your actual logo:
-          <img src="assets/logo.png" alt="Your Brand" class="nav-logo-img" />
-        Supported formats: PNG (with transparency), SVG, WebP
-        Recommended height: 32–38px
-      -->
-<img src="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/on2cook%20logo_White%201.png" alt="On2Cook" class="nav-logo-img" style="height:32px;width:auto;object-fit:contain;" />
-
-      <div class="nav-sep"></div>
-      <div class="nav-wordmark">
-        <span class="nav-wordmark-top">CM Yuva × On2Cook</span>
-        <span class="nav-wordmark-sub">Lead Intelligence System</span>
-      </div>
-    </div>
-
-    <div style="display:flex; align-items:center; gap:6px;">
-      <a href="#scoring" class="btn-outline" style="padding:8px 18px; font-size:9px;">Scoring</a>
-      <a href="/portal.html" class="btn-red"  style="padding:9px 22px; font-size:9px;">Open Portal →</a>
-    </div>
-    <div class="nav-red-accent"></div>
-  </nav>
-
-  <!-- ── HERO ── -->
-  <section class="hero" style="padding-top:60px;">
-    <div class="hero-grid"></div>
-    <div class="hero-corner"></div>
-
-    <div style="position:relative; z-index:1;">
-      <div class="hero-ticker fade-up">
-        <span class="live-dot"></span>
-        Live-synced with Google Sheets · Scores stored in Supabase
-      </div>
-
-      <div class="hero-eyebrow fade-up">CM Yuva Franchisee Program</div>
-
-      <h1 class="hero-title fade-up">
-        Qualify<br />
-        <em>Smarter.</em><br />
-        Scale <span class="accent">Faster.</span>
-      </h1>
-
-      <p class="hero-subtitle fade-up">
-        A structured lead qualification system for the On2Cook Food Business Program.
-        Score prospects in real-time during calls — every result saved to your database.
-      </p>
-
-      <div class="hero-actions fade-up">
-        <a href="/portal.html" class="btn-red">Open Lead Portal →</a>
-        <a href="#how"        class="btn-outline">Learn How It Works</a>
-      </div>
-    </div>
-
-    <!-- Side stat bar -->
-    <div class="hero-stats">
-      <div class="hero-stat-item">
-        <div class="hero-stat-num red">25</div>
-        <div class="hero-stat-label">Max Score</div>
-      </div>
-      <div class="hero-stat-item">
-        <div class="hero-stat-num">20+</div>
-        <div class="hero-stat-label">Fast-Track</div>
-      </div>
-      <div class="hero-stat-item">
-        <div class="hero-stat-num">5</div>
-        <div class="hero-stat-label">Sections</div>
-      </div>
-      <div class="hero-stat-item">
-        <div class="hero-stat-num">25<span style="font-size:20px;color:var(--text-faint);">min</span></div>
-        <div class="hero-stat-label">Call Guide</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── MARQUEE ── -->
-  <div class="marquee-track">
-    <div class="marquee-inner">
-      <span class="marquee-item highlight"><span class="m-dot"></span>Part 2 · Motivation &amp; Intent</span>
-      <span class="marquee-item"><span class="m-dot"></span>Part 3 · Food &amp; Operations Readiness</span>
-      <span class="marquee-item"><span class="m-dot"></span>Part 4 · Financial &amp; Bank Readiness</span>
-      <span class="marquee-item highlight"><span class="m-dot"></span>Part 5 · Business Mindset &amp; Scale</span>
-      <span class="marquee-item"><span class="m-dot"></span>Part 6 · Overall Program Fit</span>
-      <span class="marquee-item"><span class="m-dot"></span>Auto Red-Flag Detection</span>
-      <span class="marquee-item highlight"><span class="m-dot"></span>Google Sheets → Backend Sync</span>
-      <span class="marquee-item"><span class="m-dot"></span>Supabase Real-Time Storage</span>
-      <span class="marquee-item"><span class="m-dot"></span>Dashboard &amp; Analytics</span>
-      <!-- Duplicate for seamless loop -->
-      <span class="marquee-item highlight"><span class="m-dot"></span>Part 2 · Motivation &amp; Intent</span>
-      <span class="marquee-item"><span class="m-dot"></span>Part 3 · Food &amp; Operations Readiness</span>
-      <span class="marquee-item"><span class="m-dot"></span>Part 4 · Financial &amp; Bank Readiness</span>
-      <span class="marquee-item highlight"><span class="m-dot"></span>Part 5 · Business Mindset &amp; Scale</span>
-      <span class="marquee-item"><span class="m-dot"></span>Part 6 · Overall Program Fit</span>
-      <span class="marquee-item"><span class="m-dot"></span>Auto Red-Flag Detection</span>
-      <span class="marquee-item highlight"><span class="m-dot"></span>Google Sheets → Backend Sync</span>
-      <span class="marquee-item"><span class="m-dot"></span>Supabase Real-Time Storage</span>
-      <span class="marquee-item"><span class="m-dot"></span>Dashboard &amp; Analytics</span>
+<!-- NAV -->
+<nav class="topnav">
+  <div class="nav-brand">
+    <img src="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/on2cook%20logo_White%201.png" alt="On2Cook" style="height:30px;width:auto;object-fit:contain;" />
+    <div class="nav-sep"></div>
+    <div class="nav-wordmark">
+      <span class="nav-wordmark-top">CM Yuva × On2Cook</span>
+      <span class="nav-wordmark-sub" data-en="Lead Intelligence System" data-hi="लीड इंटेलिजेंस सिस्टम">Lead Intelligence System</span>
     </div>
   </div>
-
-
-  <!-- ── SCORING RUBRIC ── -->
-<section class="section" id="scoring" style="scroll-margin-top:70px;">
-    <div class="section-header">
-      <div class="section-eyebrow"><span class="eyebrow-num">02</span> Scoring System</div>
-      <h2 class="section-title">5 sections · 25 points total.</h2>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button id="btnEN" class="active" onclick="setLang('en')">EN</button>
+      <button id="btnHI" onclick="setLang('hi')">हि</button>
     </div>
+    <a href="#scoring" class="btn-outline" style="padding:8px 14px;font-size:8px;" data-en="Scoring" data-hi="स्कोरिंग">Scoring</a>
+    <a href="/portal.html" class="btn-red" style="padding:9px 20px;font-size:8px;" data-en="Open Portal →" data-hi="पोर्टल खोलें →">Open Portal →</a>
+  </div>
+  <div class="nav-red-accent"></div>
+</nav>
 
-    <div class="rubric-grid">
-      <div class="rubric-card">
-        <div class="rubric-part">Part 2 · 4 min</div>
-        <div class="rubric-name">Motivation &amp; Intent</div>
-        <div class="rubric-scores">
-          <div class="rubric-score">
-            <span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span>
-            Clear intent, self-driven, ready to own operations
-          </div>
-          <div class="rubric-score">
-            <span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span>
-            Interested but dependent on family decision
-          </div>
-          <div class="rubric-score">
-            <span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span>
-            Just exploring, no ownership mindset
-          </div>
-        </div>
-      </div>
-
-      <div class="rubric-card">
-        <div class="rubric-part">Part 3 · 4 min</div>
-        <div class="rubric-name">Food &amp; Operations Readiness</div>
-        <div class="rubric-scores">
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span>Location clarity + operational comfort</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span>Open but needs guidance</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span>Avoids operational responsibility</div>
-        </div>
-      </div>
-
-      <div class="rubric-card">
-        <div class="rubric-part">Part 4 · 5 min</div>
-        <div class="rubric-name">Financial &amp; Bank Readiness</div>
-        <div class="rubric-scores">
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span>Document-ready, bank-open mindset</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span>Needs family discussion</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span>Loan-averse, expects full grant</div>
-        </div>
-      </div>
-
-      <div class="rubric-card">
-        <div class="rubric-part">Part 5 · 4 min</div>
-        <div class="rubric-name">Business Mindset &amp; Scale</div>
-        <div class="rubric-scores">
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span>Growth-oriented, learning mindset</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span>Income-focused only</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span>Fixed expectations, resistant to training</div>
-        </div>
-      </div>
-
-      <div class="rubric-card">
-        <div class="rubric-part">Part 6 · 3 min</div>
-        <div class="rubric-name">Overall Program Fit</div>
-        <div class="rubric-scores">
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span>Strong alignment, decision-maker present</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span>Interested but needs more clarity</div>
-          <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span>Mismatch in expectations</div>
-        </div>
-      </div>
-
-      <div class="rubric-card danger">
-        <div class="rubric-part">🚦 Auto-Reject Triggers</div>
-        <div class="rubric-name">Mandatory Red Flags</div>
-        <div class="danger-flags">
-          <div class="danger-flag">Wants passive income only</div>
-          <div class="danger-flag">Refuses training</div>
-          <div class="danger-flag">Avoids bank process entirely</div>
-          <div class="danger-flag">No decision-maker involvement</div>
-          <div class="danger-flag">Unrealistic Month-1 income expectations</div>
-        </div>
-      </div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-corner"></div>
+  <div style="position:relative;z-index:1;">
+    <div class="hero-ticker fade-up">
+      <span class="live-dot"></span>
+      <span data-en="Live-synced with Google Sheets · Scores stored in Supabase" data-hi="Google Sheets के साथ Live-sync · Supabase में स्कोर सेव">Live-synced with Google Sheets · Scores stored in Supabase</span>
     </div>
-  </section>
-
-  <!-- ── STATUS BANDS ── -->
-  <div class="status-section">
-    <div class="section-eyebrow" style="margin-bottom:40px;"><span class="eyebrow-num">03</span> Qualification Outcomes</div>
-    <div class="status-grid">
-      <div class="status-card green">
-        <div class="status-range" style="color:#16a34a;">20–25</div>
-        <div class="status-label" style="color:#16a34a;">Fast-Track Candidate</div>
-        <div class="status-desc">Strong intent, operational clarity, bank-ready. Proceed immediately to bank orientation and document verification.</div>
-      </div>
-      <div class="status-card amber">
-        <div class="status-range" style="color:#d97706;">14–19</div>
-        <div class="status-label" style="color:#d97706;">Nurture / Counselling</div>
-        <div class="status-desc">Has potential but needs guidance. Schedule district counselling, address gaps, follow up within 7 days.</div>
-      </div>
-      <div class="status-card red">
-        <div class="status-range" style="color:#dc2626;">&lt; 14</div>
-        <div class="status-label" style="color:#dc2626;">Not Suitable Currently</div>
-        <div class="status-desc">Misalignment in expectations, readiness, or commitment. Do not proceed. Re-evaluate in 3 months if interested.</div>
-      </div>
+    <div class="hero-eyebrow fade-up" data-en="CM Yuva Franchisee Program · Uttar Pradesh" data-hi="CM युवा फ्रेंचाइजी कार्यक्रम · उत्तर प्रदेश">CM Yuva Franchisee Program · Uttar Pradesh</div>
+    <h1 class="hero-title fade-up" id="heroTitle">Qualify<br /><em>Smarter.</em><br />Scale <span class="accent">Faster.</span></h1>
+    <p class="hero-subtitle fade-up" data-en="A structured lead qualification system for the On2Cook Food Business Program. Score prospects in real-time during calls — every result saved to your database instantly." data-hi="On2Cook फूड बिज़नेस प्रोग्राम के लिए एक संरचित लीड क्वालिफिकेशन सिस्टम। कॉल के दौरान रियल-टाइम में प्रॉस्पेक्ट्स को स्कोर करें — हर परिणाम तुरंत आपके डेटाबेस में सेव होता है।">A structured lead qualification system for the On2Cook Food Business Program. Score prospects in real-time during calls — every result saved to your database instantly.</p>
+    <div class="hero-actions fade-up">
+      <a href="/portal.html" class="btn-red" data-en="Open Lead Portal →" data-hi="लीड पोर्टल खोलें →">Open Lead Portal →</a>
+      <a href="#program" class="btn-outline" data-en="About Program" data-hi="कार्यक्रम बारे में">About Program</a>
+      <a href="#scoring" class="btn-outline" data-en="Scoring Guide" data-hi="स्कोरिंग गाइड">Scoring Guide</a>
     </div>
   </div>
+  <div class="hero-stats">
+    <div class="hero-stat-item">
+      <div class="hero-stat-num red">20</div>
+      <div class="hero-stat-label" data-en="Max Score" data-hi="अधिकतम स्कोर">Max Score</div>
+    </div>
+    <div class="hero-stat-item">
+      <div class="hero-stat-num">17+</div>
+      <div class="hero-stat-label" data-en="Fast-Track" data-hi="फास्ट-ट्रैक">Fast-Track</div>
+    </div>
+    <div class="hero-stat-item">
+      <div class="hero-stat-num">5</div>
+      <div class="hero-stat-label" data-en="Sections" data-hi="भाग">Sections</div>
+    </div>
+    <div class="hero-stat-item">
+      <div class="hero-stat-num">₹8k</div>
+      <div class="hero-stat-label" data-en="Daily Potential" data-hi="रोज़ की कमाई">Daily Potential</div>
+    </div>
+  </div>
+</section>
 
-  <!-- ── CTA ── -->
-  <section class="cta-section">
+<!-- MARQUEE -->
+<div class="marquee-track">
+  <div class="marquee-inner" id="marqueeInner">
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="Part 1 · Motivation &amp; Intent" data-hi="भाग 1 · प्रेरणा और इरादा">Part 1 · Motivation &amp; Intent</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Part 2 · Food &amp; Ops Readiness" data-hi="भाग 2 · फूड और ऑपरेशन">Part 2 · Food &amp; Ops Readiness</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Part 3 · Financial &amp; Bank Readiness" data-hi="भाग 3 · वित्तीय और बैंक">Part 3 · Financial &amp; Bank Readiness</span></span>
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="Part 4 · Business Mindset" data-hi="भाग 4 · बिज़नेस माइंडसेट">Part 4 · Business Mindset</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Part 5 · Overall Program Fit" data-hi="भाग 5 · समग्र फिट">Part 5 · Overall Program Fit</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Zero Royalty Model" data-hi="ज़ीरो रॉयल्टी मॉडल">Zero Royalty Model</span></span>
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="No Interest Loan · CM Yuva" data-hi="ब्याज-मुक्त लोन · CM युवा">No Interest Loan · CM Yuva</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Cloud Kitchen &amp; Catering" data-hi="क्लाउड किचन और केटरिंग">Cloud Kitchen &amp; Catering</span></span>
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="Auto Red-Flag Detection" data-hi="ऑटो रेड-फ्लैग डिटेक्शन">Auto Red-Flag Detection</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Supabase Real-Time Storage" data-hi="Supabase रियल-टाइम स्टोरेज">Supabase Real-Time Storage</span></span>
+    <!-- duplicate -->
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="Part 1 · Motivation &amp; Intent" data-hi="भाग 1 · प्रेरणा और इरादा">Part 1 · Motivation &amp; Intent</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Part 2 · Food &amp; Ops Readiness" data-hi="भाग 2 · फूड और ऑपरेशन">Part 2 · Food &amp; Ops Readiness</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Part 3 · Financial &amp; Bank Readiness" data-hi="भाग 3 · वित्तीय और बैंक">Part 3 · Financial &amp; Bank Readiness</span></span>
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="Part 4 · Business Mindset" data-hi="भाग 4 · बिज़नेस माइंडसेट">Part 4 · Business Mindset</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Part 5 · Overall Program Fit" data-hi="भाग 5 · समग्र फिट">Part 5 · Overall Program Fit</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Zero Royalty Model" data-hi="ज़ीरो रॉयल्टी मॉडल">Zero Royalty Model</span></span>
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="No Interest Loan · CM Yuva" data-hi="ब्याज-मुक्त लोन · CM युवा">No Interest Loan · CM Yuva</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Cloud Kitchen &amp; Catering" data-hi="क्लाउड किचन और केटरिंग">Cloud Kitchen &amp; Catering</span></span>
+    <span class="marquee-item hl"><span class="m-dot"></span><span data-en="Auto Red-Flag Detection" data-hi="ऑटो रेड-फ्लैग डिटेक्शन">Auto Red-Flag Detection</span></span>
+    <span class="marquee-item"><span class="m-dot"></span><span data-en="Supabase Real-Time Storage" data-hi="Supabase रियल-टाइम स्टोरेज">Supabase Real-Time Storage</span></span>
+  </div>
+</div>
+
+<!-- PROGRAM OVERVIEW -->
+<section class="section" id="program" style="scroll-margin-top:70px;">
+  <div class="section-header">
+    <div class="section-eyebrow"><span class="eyebrow-num">01</span> <span data-en="About the Program" data-hi="कार्यक्रम के बारे में">About the Program</span></div>
+    <h2 class="section-title" data-en="Two forces. One mission." data-hi="दो शक्तियाँ। एक मिशन।">Two forces. One mission.</h2>
+    <p class="section-sub" data-en="CM Yuva Mission and On2Cook come together to convert entrepreneurial ambition into real, technology-driven food businesses across Uttar Pradesh." data-hi="CM युवा मिशन और On2Cook मिलकर उत्तर प्रदेश में उद्यमशीलता की महत्वाकांक्षा को वास्तविक, तकनीक-संचालित फूड बिज़नेस में बदलते हैं।">CM Yuva Mission and On2Cook come together to convert entrepreneurial ambition into real, technology-driven food businesses across Uttar Pradesh.</p>
+  </div>
+  <div class="overview-grid">
+    <div class="overview-card">
+      <span class="ov-icon">🏛️</span>
+      <div class="ov-title" data-en="CM Yuva Mission" data-hi="CM युवा मिशन">CM Yuva Mission</div>
+      <div class="ov-body" data-en="A flagship scheme by the Government of Uttar Pradesh to enable youth to become self-reliant entrepreneurs. It provides structured financial support — including interest-free loans — so young people can build businesses without financial burden and create employment in their communities." data-hi="उत्तर प्रदेश सरकार की एक प्रमुख योजना, जो युवाओं को आत्मनिर्भर उद्यमी बनाने के लिए बनाई गई है। इसमें ब्याज-मुक्त लोन सहित संरचित वित्तीय सहायता मिलती है — ताकि युवा बिना आर्थिक दबाव के बिज़नेस बना सकें और अपने समुदाय में रोजगार सृजित कर सकें।">A flagship scheme by the Government of Uttar Pradesh to enable youth to become self-reliant entrepreneurs. It provides structured financial support — including interest-free loans — so young people can build businesses without financial burden and create employment in their communities.</div>
+      <span class="ov-tag" data-en="Government of Uttar Pradesh" data-hi="उत्तर प्रदेश सरकार">Government of Uttar Pradesh</span>
+    </div>
+    <div class="overview-card">
+      <span class="ov-icon">🍳</span>
+      <div class="ov-title" data-en="On2Cook" data-hi="On2Cook">On2Cook</div>
+      <div class="ov-body" data-en="An indigenous cooking technology and business enablement brand that equips youth to launch food service businesses through smart cooking systems and a structured franchise model. On2Cook doesn't sell food — it sells the technology, system, and ongoing business support to help you run a profitable food operation." data-hi="एक स्वदेशी कुकिंग टेक्नोलॉजी और बिज़नेस एनेबलमेंट ब्रांड, जो स्मार्ट कुकिंग सिस्टम और संरचित फ्रेंचाइजी मॉडल के ज़रिए युवाओं को फूड सर्विस बिज़नेस शुरू करने के लिए सक्षम बनाता है। On2Cook खाना नहीं बेचता — यह तकनीक, सिस्टम और निरंतर बिज़नेस सहायता देता है।">An indigenous cooking technology and business enablement brand that equips youth to launch food service businesses through smart cooking systems and a structured franchise model. On2Cook doesn't sell food — it sells the technology, system, and ongoing business support to help you run a profitable food operation.</div>
+      <span class="ov-tag" data-en="Smart Cooking Technology" data-hi="स्मार्ट कुकिंग टेक्नोलॉजी">Smart Cooking Technology</span>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="section" id="benefits">
+  <div class="section-header">
+    <div class="section-eyebrow"><span class="eyebrow-num">02</span> <span data-en="What You Get" data-hi="आपको क्या मिलता है">What You Get</span></div>
+    <h2 class="section-title" data-en="Six pillars of your franchise." data-hi="आपकी फ्रेंचाइजी के छह स्तंभ।">Six pillars of your franchise.</h2>
+    <p class="section-sub" data-en="From funding to equipment to training — everything you need to launch and grow a profitable food business." data-hi="फंडिंग से उपकरण से ट्रेनिंग तक — एक लाभदायक फूड बिज़नेस शुरू करने और बढ़ाने के लिए सब कुछ।">From funding to equipment to training — everything you need to launch and grow a profitable food business.</p>
+  </div>
+  <div class="benefits-grid">
+    <div class="benefit-card">
+      <div class="benefit-num">01</div>
+      <div class="benefit-icon">💰</div>
+      <div class="benefit-title" data-en="Interest-Free Loan" data-hi="ब्याज-मुक्त लोन">Interest-Free Loan</div>
+      <div class="benefit-body" data-en="Under the CM Yuva Mission scheme, franchisees receive a no-interest loan to fund their setup. Start your business without the financial pressure of interest repayments eating into your early profits." data-hi="CM युवा मिशन योजना के तहत बिना ब्याज का लोन मिलता है। शुरुआती मुनाफे में ब्याज का बोझ डाले बिना अपना बिज़नेस शुरू करें।">Under the CM Yuva Mission scheme, franchisees receive a no-interest loan to fund their setup. Start your business without the financial pressure of interest repayments eating into your early profits.</div>
+      <span class="benefit-pill" data-en="CM Yuva Scheme" data-hi="CM युवा योजना">CM Yuva Scheme</span>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-num">02</div>
+      <div class="benefit-icon">🚫</div>
+      <div class="benefit-title" data-en="Zero Royalty" data-hi="ज़ीरो रॉयल्टी">Zero Royalty</div>
+      <div class="benefit-body" data-en="Every rupee you earn stays with you. No ongoing royalty fees, no percentage cuts. Your hard work directly translates to income — on day one and every day after." data-hi="आपकी कमाई का हर रुपया आपका है। कोई रॉयल्टी फीस नहीं, कोई प्रतिशत कटौती नहीं। आपकी मेहनत सीधे आपकी आमदनी में बदलती है।">Every rupee you earn stays with you. No ongoing royalty fees, no percentage cuts. Your hard work directly translates to income — on day one and every day after.</div>
+      <span class="benefit-pill" data-en="100% Yours" data-hi="100% आपका">100% Yours</span>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-num">03</div>
+      <div class="benefit-icon">🏗️</div>
+      <div class="benefit-title" data-en="Smart Equipment & Setup" data-hi="स्मार्ट उपकरण और सेटअप">Smart Equipment &amp; Setup</div>
+      <div class="benefit-body" data-en="On2Cook provides advanced cooking equipment, structured kitchen setup, and standard operating processes — enabling you to run a Cloud Kitchen or Catering Service from your own city." data-hi="On2Cook उन्नत कुकिंग उपकरण, संरचित किचन सेटअप और मानक संचालन प्रक्रियाएं प्रदान करता है — ताकि आप अपने ही शहर से Cloud Kitchen या Catering Service चला सकें।">On2Cook provides advanced cooking equipment, structured kitchen setup, and standard operating processes — enabling you to run a Cloud Kitchen or Catering Service from your own city.</div>
+      <span class="benefit-pill" data-en="Cloud Kitchen · Catering" data-hi="क्लाउड किचन · केटरिंग">Cloud Kitchen · Catering</span>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-num">04</div>
+      <div class="benefit-icon">📚</div>
+      <div class="benefit-title" data-en="Complete Training" data-hi="पूरी ट्रेनिंग">Complete Training</div>
+      <div class="benefit-body" data-en="Training across every dimension: Menu Planning, Kitchen Operations, Invoice & Billing Setup, Business Methods, Cost Control, and Quality Management. You're guided every step of the way." data-hi="हर पहलू में ट्रेनिंग: मेनू प्लानिंग, किचन ऑपरेशन, इनवॉइस और बिलिंग, बिज़नेस विधि, कॉस्ट कंट्रोल और गुणवत्ता प्रबंधन। हर कदम पर मार्गदर्शन।">Training across every dimension: Menu Planning, Kitchen Operations, Invoice &amp; Billing Setup, Business Methods, Cost Control, and Quality Management. You're guided every step of the way.</div>
+      <span class="benefit-pill" data-en="End-to-End" data-hi="शुरू से अंत तक">End-to-End</span>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-num">05</div>
+      <div class="benefit-icon">📍</div>
+      <div class="benefit-title" data-en="Operate Locally" data-hi="स्थानीय रूप से संचालन">Operate Locally</div>
+      <div class="benefit-body" data-en="Run your business in your own district and community — no relocation required. Build a loyal local customer base right where you live, backed by a proven national system." data-hi="अपने ही जिले और समुदाय में बिज़नेस चलाएं — कहीं और जाने की ज़रूरत नहीं। एक सिद्ध राष्ट्रीय सिस्टम के समर्थन से अपने ही इलाके में वफादार स्थानीय ग्राहक बनाएं।">Run your business in your own district and community — no relocation required. Build a loyal local customer base right where you live, backed by a proven national system.</div>
+      <span class="benefit-pill" data-en="Local First" data-hi="लोकल फर्स्ट">Local First</span>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-num">06</div>
+      <div class="benefit-icon">🤝</div>
+      <div class="benefit-title" data-en="Ongoing Support" data-hi="निरंतर सहायता">Ongoing Support</div>
+      <div class="benefit-body" data-en="On2Cook stays with you beyond launch. Receive continuous guidance on operations, quality standards, scaling, and troubleshooting — backed by a team with deep expertise in food business systems." data-hi="On2Cook लॉन्च के बाद भी आपके साथ रहता है। ऑपरेशन, गुणवत्ता मानकों, स्केलिंग और समस्या-समाधान पर निरंतर मार्गदर्शन।">On2Cook stays with you beyond launch. Receive continuous guidance on operations, quality standards, scaling, and troubleshooting — backed by a team with deep expertise in food business systems.</div>
+      <span class="benefit-pill" data-en="Always On" data-hi="हमेशा साथ">Always On</span>
+    </div>
+  </div>
+</section>
+
+<!-- EARNINGS -->
+<section class="earnings-section" id="earnings">
+  <div class="earnings-inner">
     <div>
-      <h2 class="cta-title">
-        Start qualifying<br />
-        <em>your pipeline</em><br />
-        today.
-      </h2>
+      <div class="section-eyebrow" style="padding-top:0; margin-bottom:16px;"><span class="eyebrow-num">03</span> <span data-en="Earnings Potential" data-hi="कमाई की संभावना">Earnings Potential</span></div>
+      <div class="earnings-big">₹8,000</div>
+      <div class="earnings-label" data-en="estimated daily revenue · with the right system in place" data-hi="अनुमानित दैनिक राजस्व · सही सिस्टम के साथ">estimated daily revenue · with the right system in place</div>
+      <div class="earnings-breakdown">
+        <div class="earn-row">
+          <span class="earn-row-label" data-en="Daily plates target" data-hi="दैनिक प्लेट लक्ष्य">Daily plates target</span>
+          <span class="earn-row-val" data-en="70–80 plates" data-hi="70–80 प्लेट">70–80 plates</span>
+        </div>
+        <div class="earn-row">
+          <span class="earn-row-label" data-en="Estimated daily revenue" data-hi="अनुमानित दैनिक राजस्व">Estimated daily revenue</span>
+          <span class="earn-row-val" style="color:var(--red);">~₹8,000</span>
+        </div>
+        <div class="earn-row">
+          <span class="earn-row-label" data-en="Monthly potential" data-hi="मासिक संभावना">Monthly potential</span>
+          <span class="earn-row-val" style="color:var(--red);">~₹2.4 Lakh</span>
+        </div>
+        <div class="earn-row">
+          <span class="earn-row-label" data-en="Royalty deducted" data-hi="रॉयल्टी कटौती">Royalty deducted</span>
+          <span class="earn-row-val" style="color:var(--green);" data-en="₹0 — Zero Royalty" data-hi="₹0 — ज़ीरो रॉयल्टी">₹0 — Zero Royalty</span>
+        </div>
+        <div class="earn-row">
+          <span class="earn-row-label" data-en="Interest on loan" data-hi="लोन पर ब्याज">Interest on loan</span>
+          <span class="earn-row-val" style="color:var(--green);" data-en="₹0 — CM Yuva benefit" data-hi="₹0 — CM युवा लाभ">₹0 — CM Yuva benefit</span>
+        </div>
+      </div>
+      <p class="earnings-disclaimer" data-en="* Illustrative targets based on the structured program model. Actual results depend on location, operations, and effort." data-hi="* संरचित प्रोग्राम मॉडल पर आधारित अनुमानित लक्ष्य। वास्तविक परिणाम लोकेशन, ऑपरेशन और प्रयास पर निर्भर।">* Illustrative targets based on the structured program model. Actual results depend on location, operations, and effort.</p>
     </div>
-    <div class="cta-right">
-      <p class="cta-note">
-        Your Google Sheet syncs through the backend.
-        Scores save instantly to Supabase.
-        The whole team works from one source of truth.
-      </p>
-      <a href="/portal.html" class="btn-red" style="font-size:12px; padding:16px 48px;">Open Lead Portal →</a>
-    </div>
-  </section>
-
-  <!-- ── FOOTER ── -->
-  <footer class="sitefooter">
-    <div class="footer-brand">
-      <!--
-        FOOTER LOGO:
-        Replace placeholder with:
-          <img src="assets/logo.png" alt="Your Brand" class="footer-logo-img" />
-      -->
-<img src="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/on2cook%20logo_White%201.png" alt="On2Cook" style="height:28px;width:auto;object-fit:contain;opacity:0.85;" />
-      <div class="footer-info">
-        <strong>CM Yuva × On2Cook</strong><br />
-        Lead Intelligence System · Franchise Qualification Portal
+    <div>
+      <p class="earnings-note" data-en="This isn't just about income. It's about building self-reliance, creating jobs in your community, and owning a real business powered by technology. With training and the right system in place, hitting 70–80 plates a day is a realistic, achievable target — not a guarantee, but a proven benchmark." data-hi="यह सिर्फ कमाई के बारे में नहीं है। यह आत्मनिर्भरता बनाने, अपने समुदाय में रोजगार सृजित करने और तकनीक से संचालित एक वास्तविक बिज़नेस के मालिक होने के बारे में है। ट्रेनिंग और सही सिस्टम के साथ, प्रतिदिन 70–80 प्लेट एक यथार्थवादी, प्राप्य लक्ष्य है।">This isn't just about income. It's about building self-reliance, creating jobs in your community, and owning a real business powered by technology. With training and the right system in place, hitting 70–80 plates a day is a realistic, achievable target — not a guarantee, but a proven benchmark.</p>
+      <div class="biz-box">
+        <div class="biz-row">
+          <div class="biz-row-tag" data-en="Business Type A" data-hi="बिज़नेस प्रकार A">Business Type A</div>
+          <div class="biz-row-name" data-en="Cloud Kitchen" data-hi="क्लाउड किचन">Cloud Kitchen</div>
+          <div class="biz-row-desc" data-en="Home-based or rented kitchen space, delivery-focused. Low overhead, high flexibility. Ideal for starting lean." data-hi="घर पर या किराए की किचन, डिलीवरी पर ध्यान। कम ओवरहेड, अधिक लचीलापन। कम लागत में शुरुआत के लिए आदर्श।">Home-based or rented kitchen space, delivery-focused. Low overhead, high flexibility. Ideal for starting lean.</div>
+        </div>
+        <div class="biz-row">
+          <div class="biz-row-tag" data-en="Business Type B" data-hi="बिज़नेस प्रकार B">Business Type B</div>
+          <div class="biz-row-name" data-en="Catering Service" data-hi="केटरिंग सर्विस">Catering Service</div>
+          <div class="biz-row-desc" data-en="Events, offices, institutions. Scale up with volume orders. Build long-term contracts and stable recurring revenue." data-hi="इवेंट, ऑफिस, संस्थाएं। वॉल्यूम ऑर्डर के साथ स्केल करें। दीर्घकालिक अनुबंध और स्थिर राजस्व बनाएं।">Events, offices, institutions. Scale up with volume orders. Build long-term contracts and stable recurring revenue.</div>
+        </div>
       </div>
     </div>
-    <div class="footer-right">
-      <div class="footer-red-line"></div>
-      <p>5 sections · 25 points · 20–25 min call</p>
-      <p>Fast-Track ≥ 20 · Nurture 14–19 · Reject &lt; 14</p>
-    </div>
-  </footer>
+  </div>
+</section>
 
+<!-- WHO IS IT FOR -->
+<section class="section" id="who">
+  <div class="section-header">
+    <div class="section-eyebrow"><span class="eyebrow-num">04</span> <span data-en="Ideal Candidate" data-hi="आदर्श उम्मीदवार">Ideal Candidate</span></div>
+    <h2 class="section-title" data-en="This opportunity is built for you — if..." data-hi="यह अवसर आपके लिए है — अगर...">This opportunity is built for you — if...</h2>
+  </div>
+  <div class="who-grid">
+    <div class="who-card yes">
+      <div class="who-label" data-en="✓ Right Fit" data-hi="✓ सही उम्मीदवार">✓ Right Fit</div>
+      <div class="who-list">
+        <div class="who-item" data-en="You want to own and operate your own business" data-hi="आप अपना खुद का बिज़नेस चलाना चाहते हैं">You want to own and operate your own business</div>
+        <div class="who-item" data-en="You're willing to work with technology and learn modern systems" data-hi="आप तकनीक के साथ काम करने और आधुनिक सिस्टम सीखने के लिए तैयार हैं">You're willing to work with technology and learn modern systems</div>
+        <div class="who-item" data-en="You choose entrepreneurship over a fixed-salary job" data-hi="आप निश्चित वेतन वाली नौकरी की बजाय उद्यमिता चुनते हैं">You choose entrepreneurship over a fixed-salary job</div>
+        <div class="who-item" data-en="You want to create employment opportunities in your community" data-hi="आप अपने समुदाय में रोजगार के अवसर बनाना चाहते हैं">You want to create employment opportunities in your community</div>
+        <div class="who-item" data-en="You can commit to operations and training from Day 1" data-hi="आप पहले दिन से ऑपरेशन और ट्रेनिंग के लिए प्रतिबद्ध हो सकते हैं">You can commit to operations and training from Day 1</div>
+        <div class="who-item" data-en="A decision-maker is involved and present in the process" data-hi="निर्णय लेने वाला व्यक्ति प्रक्रिया में शामिल और उपस्थित है">A decision-maker is involved and present in the process</div>
+      </div>
+    </div>
+    <div class="who-card no">
+      <div class="who-label" data-en="✕ Not a Fit" data-hi="✕ उपयुक्त नहीं">✕ Not a Fit</div>
+      <div class="who-list">
+        <div class="who-item" data-en="You want passive income with no operational involvement" data-hi="आप बिना किसी ऑपरेशनल भागीदारी के निष्क्रिय आय चाहते हैं">You want passive income with no operational involvement</div>
+        <div class="who-item" data-en="You refuse to attend training or follow the system" data-hi="आप ट्रेनिंग में भाग लेने या सिस्टम का पालन करने से इनकार करते हैं">You refuse to attend training or follow the system</div>
+        <div class="who-item" data-en="You want to avoid the bank and loan process entirely" data-hi="आप बैंक और लोन प्रक्रिया से पूरी तरह बचना चाहते हैं">You want to avoid the bank and loan process entirely</div>
+        <div class="who-item" data-en="You expect a full government grant with nothing to repay" data-hi="आप बिना किसी चुकाव के पूरी सरकारी ग्रांट की उम्मीद रखते हैं">You expect a full government grant with nothing to repay</div>
+        <div class="who-item" data-en="You have unrealistic Month-1 income expectations" data-hi="आपकी पहले महीने की कमाई की अवास्तविक उम्मीदें हैं">You have unrealistic Month-1 income expectations</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO APPLY -->
+<section class="section" id="apply">
+  <div class="section-header">
+    <div class="section-eyebrow"><span class="eyebrow-num">05</span> <span data-en="How to Apply" data-hi="कैसे आवेदन करें">How to Apply</span></div>
+    <h2 class="section-title" data-en="Your path to franchise ownership." data-hi="फ्रेंचाइजी मालिक बनने का रास्ता।">Your path to franchise ownership.</h2>
+  </div>
+  <div class="apply-steps">
+    <div class="apply-step">
+      <div class="apply-step-num">01</div>
+      <div class="apply-step-title" data-en="Qualification Call" data-hi="क्वालिफिकेशन कॉल">Qualification Call</div>
+      <div class="apply-step-body" data-en="Our team conducts a structured 20–25 minute call using this Lead Intelligence System — 5 sections, scored live to assess your readiness and fit for the program." data-hi="हमारी टीम इस लीड इंटेलिजेंस सिस्टम का उपयोग करके 20–25 मिनट की संरचित कॉल करती है — 5 भाग, आपकी तैयारी और फिट का आकलन करने के लिए लाइव स्कोर।">Our team conducts a structured 20–25 minute call using this Lead Intelligence System — 5 sections, scored live to assess your readiness and fit for the program.</div>
+    </div>
+    <div class="apply-step">
+      <div class="apply-step-num">02</div>
+      <div class="apply-step-title" data-en="Bank Orientation" data-hi="बैंक ओरिएंटेशन">Bank Orientation</div>
+      <div class="apply-step-body" data-en="Fast-track candidates (17+ score) are immediately moved to bank orientation and document verification for the CM Yuva interest-free loan process." data-hi="फास्ट-ट्रैक उम्मीदवार (17+ स्कोर) को CM युवा ब्याज-मुक्त लोन प्रक्रिया के लिए तुरंत बैंक ओरिएंटेशन और दस्तावेज़ सत्यापन में ले जाया जाता है।">Fast-track candidates (17+ score) are immediately moved to bank orientation and document verification for the CM Yuva interest-free loan process.</div>
+    </div>
+    <div class="apply-step">
+      <div class="apply-step-num">03</div>
+      <div class="apply-step-title" data-en="Training & Setup" data-hi="ट्रेनिंग और सेटअप">Training &amp; Setup</div>
+      <div class="apply-step-body" data-en="Comprehensive training on kitchen operations, menu planning, billing, and quality management. Your kitchen is set up with On2Cook's smart equipment and standard operating processes." data-hi="किचन ऑपरेशन, मेनू प्लानिंग, बिलिंग और गुणवत्ता प्रबंधन पर व्यापक ट्रेनिंग। आपकी किचन On2Cook के स्मार्ट उपकरण और मानक प्रक्रियाओं के साथ सेट होती है।">Comprehensive training on kitchen operations, menu planning, billing, and quality management. Your kitchen is set up with On2Cook's smart equipment and standard operating processes.</div>
+    </div>
+    <div class="apply-step">
+      <div class="apply-step-num">04</div>
+      <div class="apply-step-title" data-en="Launch & Scale" data-hi="लॉन्च और स्केल">Launch &amp; Scale</div>
+      <div class="apply-step-body" data-en="Go live in your local market. On2Cook's team continues to support you as you grow — operations, quality control, and expansion planning backed by real data." data-hi="अपने स्थानीय बाज़ार में लाइव हों। On2Cook की टीम आपके बढ़ने के साथ आपका समर्थन करती रहती है — वास्तविक डेटा द्वारा समर्थित ऑपरेशन, गुणवत्ता नियंत्रण और विस्तार योजना।">Go live in your local market. On2Cook's team continues to support you as you grow — operations, quality control, and expansion planning backed by real data.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SCORING RUBRIC -->
+<section class="section" id="scoring" style="scroll-margin-top:70px;">
+  <div class="section-header">
+    <div class="section-eyebrow"><span class="eyebrow-num">06</span> <span data-en="Scoring System" data-hi="स्कोरिंग सिस्टम">Scoring System</span></div>
+    <h2 class="section-title" data-en="5 sections · 20 points total." data-hi="5 भाग · 20 अंक कुल।">5 sections · 20 points total.</h2>
+    <p class="section-sub" data-en="Every lead is scored live during the qualification call. Use the portal to record scores in real-time — results sync instantly to your database." data-hi="हर लीड को क्वालिफिकेशन कॉल के दौरान लाइव स्कोर किया जाता है। स्कोर रियल-टाइम में रिकॉर्ड करने के लिए पोर्टल का उपयोग करें — परिणाम तुरंत आपके डेटाबेस में सिंक होते हैं।">Every lead is scored live during the qualification call. Use the portal to record scores in real-time — results sync instantly to your database.</p>
+  </div>
+  <div class="rubric-grid">
+    <div class="rubric-card">
+      <div class="rubric-part" data-en="Part 1 · 4 min" data-hi="भाग 1 · 4 मिनट">Part 1 · 4 min</div>
+      <div class="rubric-name" data-en="Motivation &amp; Intent" data-hi="प्रेरणा और इरादा">Motivation &amp; Intent</div>
+      <div class="rubric-scores">
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span><span data-en="Clear intent, self-driven, ready to own operations" data-hi="स्पष्ट इरादा, स्व-प्रेरित, ऑपरेशन के लिए तैयार">Clear intent, self-driven, ready to own operations</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span><span data-en="Interested but dependent on family decision" data-hi="रुचि है लेकिन परिवार के निर्णय पर निर्भर">Interested but dependent on family decision</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span><span data-en="Just exploring, no ownership mindset" data-hi="केवल एक्सप्लोर कर रहे हैं, ओनरशिप माइंडसेट नहीं">Just exploring, no ownership mindset</span></div>
+      </div>
+    </div>
+    <div class="rubric-card">
+      <div class="rubric-part" data-en="Part 2 · 4 min" data-hi="भाग 2 · 4 मिनट">Part 2 · 4 min</div>
+      <div class="rubric-name" data-en="Food &amp; Operations Readiness" data-hi="फूड और ऑपरेशन तैयारी">Food &amp; Operations Readiness</div>
+      <div class="rubric-scores">
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span><span data-en="Location clarity + operational comfort" data-hi="लोकेशन स्पष्टता + ऑपरेशनल आराम">Location clarity + operational comfort</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span><span data-en="Open but needs guidance" data-hi="खुले हैं लेकिन मार्गदर्शन चाहिए">Open but needs guidance</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span><span data-en="Avoids operational responsibility" data-hi="ऑपरेशनल जिम्मेदारी से बचते हैं">Avoids operational responsibility</span></div>
+      </div>
+    </div>
+    <div class="rubric-card">
+      <div class="rubric-part" data-en="Part 3 · 5 min" data-hi="भाग 3 · 5 मिनट">Part 3 · 5 min</div>
+      <div class="rubric-name" data-en="Financial &amp; Bank Readiness" data-hi="वित्तीय और बैंक तैयारी">Financial &amp; Bank Readiness</div>
+      <div class="rubric-scores">
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span><span data-en="Document-ready, bank-open mindset" data-hi="दस्तावेज़ तैयार, बैंक-खुला माइंडसेट">Document-ready, bank-open mindset</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span><span data-en="Needs family discussion first" data-hi="पहले परिवार से चर्चा की जरूरत">Needs family discussion first</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span><span data-en="Loan-averse, expects full grant" data-hi="लोन से परहेज, पूरी ग्रांट की उम्मीद">Loan-averse, expects full grant</span></div>
+      </div>
+    </div>
+    <div class="rubric-card">
+      <div class="rubric-part" data-en="Part 4 · 4 min" data-hi="भाग 4 · 4 मिनट">Part 4 · 4 min</div>
+      <div class="rubric-name" data-en="Business Mindset &amp; Scale" data-hi="बिज़नेस माइंडसेट और स्केल">Business Mindset &amp; Scale</div>
+      <div class="rubric-scores">
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span><span data-en="Growth-oriented, learning mindset" data-hi="विकास-उन्मुख, सीखने का माइंडसेट">Growth-oriented, learning mindset</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span><span data-en="Income-focused only" data-hi="केवल आय पर केंद्रित">Income-focused only</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span><span data-en="Fixed expectations, resistant to training" data-hi="निश्चित उम्मीदें, ट्रेनिंग के प्रति प्रतिरोधी">Fixed expectations, resistant to training</span></div>
+      </div>
+    </div>
+    <div class="rubric-card">
+      <div class="rubric-part" data-en="Part 5 · 3 min" data-hi="भाग 5 · 3 मिनट">Part 5 · 3 min</div>
+      <div class="rubric-name" data-en="Overall Program Fit" data-hi="समग्र प्रोग्राम फिट">Overall Program Fit</div>
+      <div class="rubric-scores">
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(22,163,74,0.15);color:#16a34a;">5</span><span data-en="Strong alignment, decision-maker present" data-hi="मजबूत संरेखण, निर्णय लेने वाला मौजूद">Strong alignment, decision-maker present</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(217,119,6,0.15);color:#d97706;">3</span><span data-en="Interested but needs more clarity" data-hi="रुचि है लेकिन अधिक स्पष्टता चाहिए">Interested but needs more clarity</span></div>
+        <div class="rubric-score"><span class="score-dot" style="background:rgba(220,38,38,0.15);color:#dc2626;">1</span><span data-en="Mismatch in expectations" data-hi="उम्मीदों में असमानता">Mismatch in expectations</span></div>
+      </div>
+    </div>
+    <div class="rubric-card danger">
+      <div class="rubric-part" data-en="🚦 Auto-Reject Triggers" data-hi="🚦 ऑटो-रिजेक्ट ट्रिगर">🚦 Auto-Reject Triggers</div>
+      <div class="rubric-name" data-en="Mandatory Red Flags" data-hi="अनिवार्य रेड फ्लैग">Mandatory Red Flags</div>
+      <div class="danger-flags">
+        <div class="danger-flag" data-en="Wants passive income only" data-hi="केवल निष्क्रिय आय चाहते हैं">Wants passive income only</div>
+        <div class="danger-flag" data-en="Refuses training" data-hi="ट्रेनिंग से इनकार करते हैं">Refuses training</div>
+        <div class="danger-flag" data-en="Avoids bank process entirely" data-hi="बैंक प्रक्रिया से पूरी तरह बचते हैं">Avoids bank process entirely</div>
+        <div class="danger-flag" data-en="No decision-maker involvement" data-hi="निर्णय लेने वाले की कोई भागीदारी नहीं">No decision-maker involvement</div>
+        <div class="danger-flag" data-en="Unrealistic Month-1 income expectations" data-hi="पहले महीने की अवास्तविक आय उम्मीदें">Unrealistic Month-1 income expectations</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS BANDS -->
+<div class="status-section">
+  <div class="section-eyebrow" style="margin-bottom:40px;"><span class="eyebrow-num">07</span> <span data-en="Qualification Outcomes" data-hi="क्वालिफिकेशन परिणाम">Qualification Outcomes</span></div>
+  <div class="status-grid">
+    <div class="status-card green">
+      <div class="status-range" style="color:#16a34a;">17–20</div>
+      <div class="status-label" style="color:#16a34a;" data-en="Fast-Track Candidate" data-hi="फास्ट-ट्रैक उम्मीदवार">Fast-Track Candidate</div>
+      <div class="status-desc" data-en="Strong intent, operational clarity, bank-ready. Proceed immediately to bank orientation and document verification." data-hi="मजबूत इरादा, ऑपरेशनल स्पष्टता, बैंक-तैयार। तुरंत बैंक ओरिएंटेशन और दस्तावेज़ सत्यापन पर आगे बढ़ें।">Strong intent, operational clarity, bank-ready. Proceed immediately to bank orientation and document verification.</div>
+    </div>
+    <div class="status-card amber">
+      <div class="status-range" style="color:#d97706;">12–16</div>
+      <div class="status-label" style="color:#d97706;" data-en="Nurture / Counselling" data-hi="नर्चर / काउंसलिंग">Nurture / Counselling</div>
+      <div class="status-desc" data-en="Has potential but needs guidance. Schedule district counselling, address gaps, follow up within 7 days." data-hi="संभावना है लेकिन मार्गदर्शन की ज़रूरत है। जिला काउंसलिंग शेड्यूल करें, 7 दिनों के भीतर फॉलो-अप करें।">Has potential but needs guidance. Schedule district counselling, address gaps, follow up within 7 days.</div>
+    </div>
+    <div class="status-card red">
+      <div class="status-range" style="color:#dc2626;">&lt; 12</div>
+      <div class="status-label" style="color:#dc2626;" data-en="Not Suitable Currently" data-hi="अभी उपयुक्त नहीं">Not Suitable Currently</div>
+      <div class="status-desc" data-en="Misalignment in expectations, readiness, or commitment. Do not proceed. Re-evaluate in 3 months if still interested." data-hi="उम्मीदों, तैयारी या प्रतिबद्धता में असमानता। आगे न बढ़ें। यदि रुचि हो तो 3 महीने में पुनर्मूल्यांकन करें।">Misalignment in expectations, readiness, or commitment. Do not proceed. Re-evaluate in 3 months if still interested.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div>
+    <h2 class="cta-title" id="ctaTitle">Start qualifying<br /><em>your pipeline</em><br />today.</h2>
+  </div>
+  <div class="cta-right">
+    <p class="cta-note" data-en="Your Google Sheet syncs through the backend. Scores save instantly to Supabase. The whole team works from one source of truth." data-hi="आपकी Google Sheet बैकएंड के माध्यम से सिंक होती है। स्कोर तुरंत Supabase में सेव होते हैं। पूरी टीम एक ही सोर्स ऑफ ट्रुथ से काम करती है।">Your Google Sheet syncs through the backend. Scores save instantly to Supabase. The whole team works from one source of truth.</p>
+    <a href="/portal.html" class="btn-red" style="font-size:12px;padding:16px 48px;" data-en="Open Lead Portal →" data-hi="लीड पोर्टल खोलें →">Open Lead Portal →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="sitefooter">
+  <div class="footer-brand">
+    <img src="https://wwtjhzwzzkwvzjtybygg.supabase.co/storage/v1/object/public/images/on2cook%20logo_White%201.png" alt="On2Cook" style="height:28px;width:auto;object-fit:contain;opacity:0.8;" />
+    <div class="footer-info">
+      <strong>CM Yuva × On2Cook</strong><br />
+      <span data-en="Lead Intelligence System · Franchise Qualification Portal" data-hi="लीड इंटेलिजेंस सिस्टम · फ्रेंचाइजी क्वालिफिकेशन पोर्टल">Lead Intelligence System · Franchise Qualification Portal</span>
+    </div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-red-line"></div>
+    <p data-en="5 sections · 20 points · 20–25 min call" data-hi="5 भाग · 20 अंक · 20–25 मिनट कॉल">5 sections · 20 points · 20–25 min call</p>
+    <p data-en="Fast-Track ≥ 17 · Nurture 12–16 · Reject < 12" data-hi="फास्ट-ट्रैक ≥ 17 · नर्चर 12–16 · रिजेक्ट < 12">Fast-Track ≥ 17 · Nurture 12–16 · Reject &lt; 12</p>
+    <p style="margin-top:6px;color:var(--text-faint);">Zero Royalty · No Interest Loan · CM Yuva UP</p>
+  </div>
+</footer>
+
+<script>
+const heroTitles = {
+  en: `Qualify<br /><em>Smarter.</em><br />Scale <span class="accent">Faster.</span>`,
+  hi: `करें<br /><em>स्मार्ट</em><br />क्वालिफाई <span class="accent">आज ही।</span>`
+};
+const ctaTitles = {
+  en: `Start qualifying<br /><em>your pipeline</em><br />today.`,
+  hi: `शुरू करें<br /><em>अपनी पाइपलाइन</em><br />क्वालिफाई करना।`
+};
+
+function setLang(lang) {
+  document.body.classList.toggle('lang-hi', lang === 'hi');
+  document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+  document.getElementById('btnHI').classList.toggle('active', lang === 'hi');
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const val = el.getAttribute('data-' + lang);
+    if (val !== null) el.innerHTML = val;
+  });
+  document.getElementById('heroTitle').innerHTML = heroTitles[lang];
+  document.getElementById('ctaTitle').innerHTML = ctaTitles[lang];
+  document.documentElement.lang = lang === 'hi' ? 'hi' : 'en';
+  try { localStorage.setItem('cmyuva_lang', lang); } catch(e) {}
+}
+
+// init
+const saved = (() => { try { return localStorage.getItem('cmyuva_lang'); } catch(e) { return null; } })();
+setLang(saved || 'en');
+</script>
 </body>
 </html>
