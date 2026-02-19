@@ -5,24 +5,22 @@
 
 // ── STATE ──────────────────────────────────────────────────────
 const State = {
-  leads:         [],
-  scoredMap:     {},
-  currentLeadId: null,
-  currentScores: {},
-  currentFlags:  {},
-  currentNotes:  '',
-  activeTab:     'leads',
+  leads:              [],
+  scoredMap:          {},
+  currentLeadId:      null,
+  currentScores:      {},
+  currentFlags:       {},
+  currentNotes:       '',
+  currentDisposition: null,   // NEW: 'drop' | 'info-requested' | 'callback' | null
+  activeTab:          'leads',
 };
 
-// ── SUPABASE INIT (portal.js owns this — avoids double-declaration) ──
-// `db` may already exist from config.js. If not, we create it here.
+// ── SUPABASE INIT ──────────────────────────────────────────────
 let _db = null;
 
 async function getDB() {
   if (_db) return _db;
-  // Try to use whatever config.js put on window (old or new version)
   if (typeof db !== 'undefined' && db !== null) { _db = db; return _db; }
-  // Otherwise fetch credentials ourselves
   try {
     const res = await fetch('/api/config');
     if (!res.ok) throw new Error(`/api/config → HTTP ${res.status}`);
@@ -38,7 +36,6 @@ async function getDB() {
 // ── BOOTSTRAP ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   setSyncStatus('Connecting...');
-
   _db = await getDB();
 
   if (!_db) {
@@ -71,7 +68,7 @@ async function loadScoredFromDB() {
   }, {});
 }
 
-// ── LEADS (paginated to bypass 1000-row Supabase limit) ───────
+// ── LEADS (paginated) ──────────────────────────────────────────
 async function loadLeads() {
   setSyncStatus('Fetching leads...');
   try {
@@ -103,44 +100,56 @@ async function loadLeads() {
 }
 
 // ── FILTERS ────────────────────────────────────────────────────
-// ── UPDATED FILTERS POPULATE ─────────────────────
 function populateFilters() {
   const getUnique = (key) =>
     [...new Set(State.leads.map(l => l[key]).filter(Boolean))].sort();
 
-  // Existing filters...
-  const citySel  = document.getElementById('filter-city');
-  const allocSel = document.getElementById('filter-alloc');
-  const platSel  = document.getElementById('filter-platform');
-  
-  // NEW: Status filter (uses scoredMap status)
+  const citySel   = document.getElementById('filter-city');
+  const allocSel  = document.getElementById('filter-alloc');
+  const platSel   = document.getElementById('filter-platform');
   const statusSel = document.getElementById('filter-status');
-  
+
   if (citySel)  citySel.innerHTML  = '<option value="">All Target Cities</option>'
     + getUnique('target_city').map(c => `<option value="${c}">${c}</option>`).join('');
   if (allocSel) allocSel.innerHTML = '<option value="">All Team Members</option>'
     + getUnique('lead_alloc').map(o => `<option value="${o}">${o}</option>`).join('');
-  if (platSel)  platSel.innerHTML = '<option value="">All Platforms</option>'
+  if (platSel)  platSel.innerHTML  = '<option value="">All Platforms</option>'
     + getUnique('platform').map(p => `<option value="${p}">${p}</option>`).join('');
-    
-  // NEW: Populate status from scoredMap
+
   if (statusSel) {
-    const statusOptions = ['Open', 'fast-track', 'nurture', 'auto-reject', 'not-suitable', 'rejected'];
-    statusSel.innerHTML = '<option value="">All Status</option>' + 
-      statusOptions.map(s => `<option value="${s}">${s.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>`).join('');
+    const statusOptions = [
+      'Open', 'fast-track', 'nurture', 'auto-reject',
+      'not-suitable', 'rejected', 'drop', 'info-requested', 'callback'
+    ];
+    statusSel.innerHTML = '<option value="">All Status</option>' +
+      statusOptions.map(s => `<option value="${s}">${formatStatusLabel(s)}</option>`).join('');
   }
 }
 
+function formatStatusLabel(s) {
+  const map = {
+    'Open':           'Open',
+    'fast-track':     'Fast Track',
+    'nurture':        'Nurture',
+    'auto-reject':    'Auto Reject',
+    'not-suitable':   'Not Suitable',
+    'rejected':       'Rejected',
+    'drop':           'Dropped',
+    'info-requested': 'Info Requested',
+    'callback':       'Call Back',
+  };
+  return map[s] || s;
+}
 
 // ── LEAD GRID ──────────────────────────────────────────────────
 function renderLeadGrid() {
   const panel = document.getElementById('content-panel');
   if (!panel || State.activeTab === 'dashboard') return;
 
-  const search = (document.getElementById('search-input')?.value || '').toLowerCase();
-  const cityF  = document.getElementById('filter-city')?.value     || '';
-  const allocF = document.getElementById('filter-alloc')?.value    || '';
-  const platF  = document.getElementById('filter-platform')?.value || '';
+  const search  = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const cityF   = document.getElementById('filter-city')?.value    || '';
+  const allocF  = document.getElementById('filter-alloc')?.value   || '';
+  const platF   = document.getElementById('filter-platform')?.value || '';
   const statusF = document.getElementById('filter-status')?.value  || '';
 
   const filtered = State.leads.filter(l => {
@@ -150,10 +159,10 @@ function renderLeadGrid() {
     const matchCity   = !cityF  || l.target_city === cityF;
     const matchAlloc  = !allocF || l.lead_alloc  === allocF;
     const matchPlat   = !platF  || l.platform    === platF;
-    const leadStatus  = l.status || 'Open';              // ← read from lead directly
+    const leadStatus  = l.status || 'Open';
     const matchStatus = !statusF || leadStatus === statusF;
     return matchSearch && matchCity && matchAlloc && matchPlat && matchStatus;
-});
+  });
 
   const meta = document.getElementById('leads-meta');
   if (meta) meta.textContent = `${filtered.length} leads`;
@@ -174,20 +183,9 @@ function renderLeadGrid() {
         </thead>
         <tbody>
           ${filtered.map(l => {
-            const sc = State.scoredMap[l.id] 
-        || State.scoredMap[l.lead_id] 
-        || State.scoredMap[String(l.id).trim()];
-            // REPLACE the st block in filtered.map() with:
-const leadStatus = l.status || 'Open';   // ← direct, no scoredMap lookup needed
-const total      = l.total  || null;
-
-let st;
-if (leadStatus === 'fast-track')   st = { label: 'Fast Track',   color: '#16a34a' };
-else if (leadStatus === 'nurture') st = { label: 'Nurture',      color: '#d97706' };
-else if (leadStatus === 'auto-reject') st = { label: 'Auto Reject', color: '#dc2626' };
-else if (leadStatus === 'not-suitable') st = { label: 'Not Suitable', color: '#dc2626' };
-else                               st = { label: 'Open',          color: 'var(--text-faint)' };
-
+            const leadStatus = l.status || 'Open';
+            const total      = l.total  || null;
+            const st         = getStatusBadge(leadStatus);
             return `
               <tr>
                 <td>
@@ -198,7 +196,7 @@ else                               st = { label: 'Open',          color: 'var(--
                 <td style="color:var(--red);font-weight:600;">${l.lead_alloc || 'Unassigned'}</td>
                 <td><span class="plat-tag">${l.platform || 'FB'}</span></td>
                 <td><span class="badge" style="color:${st.color};border-color:${st.color}">${st.label}</span></td>
-<td><b style="font-size:14px;color:${st.color}">${total ?? '—'}</b></td>
+                <td><b style="font-size:14px;color:${st.color}">${total ?? '—'}</b></td>
                 <td><button class="icon-btn" onclick="selectLead('${l.id}')">Open Profile</button></td>
               </tr>`;
           }).join('')}
@@ -207,6 +205,20 @@ else                               st = { label: 'Open',          color: 'var(--
     </div>`;
 }
 
+// Unified badge helper (includes new dispositions)
+function getStatusBadge(status) {
+  const map = {
+    'fast-track':     { label: 'Fast Track',     color: '#16a34a' },
+    'nurture':        { label: 'Nurture',         color: '#d97706' },
+    'auto-reject':    { label: 'Auto Reject',     color: '#dc2626' },
+    'not-suitable':   { label: 'Not Suitable',    color: '#dc2626' },
+    'rejected':       { label: 'Rejected',        color: '#dc2626' },
+    'drop':           { label: 'Dropped',         color: '#6b7280' },
+    'info-requested': { label: 'Info Requested',  color: '#7c3aed' },
+    'callback':       { label: 'Call Back',       color: '#0ea5e9' },
+  };
+  return map[status] || { label: 'Open', color: 'var(--text-faint)' };
+}
 
 // ── TABS ───────────────────────────────────────────────────────
 function switchTab(tab) {
@@ -239,14 +251,20 @@ async function refreshAll() {
 
 // ── SELECT LEAD ────────────────────────────────────────────────
 function selectLead(id) {
-  State.currentLeadId = id;
+  State.currentLeadId      = id;
+  State.currentDisposition = null;
   const lead = State.leads.find(l => l.id === id);
   if (!lead) return;
 
-  const sc = State.scoredMap[id] || State.scoredMap[String(id).trim()]
+  const sc = State.scoredMap[id] || State.scoredMap[String(id).trim()];
   State.currentScores = sc ? { ...sc.scores } : {};
   State.currentFlags  = sc ? { ...sc.flags  } : {};
   State.currentNotes  = sc ? (sc.notes || '') : '';
+
+  // Restore disposition if the lead had one
+  if (sc && ['drop','info-requested','callback'].includes(sc.status)) {
+    State.currentDisposition = sc.status;
+  }
 
   const panel = document.getElementById('content-panel');
   panel.innerHTML = buildScoreFormHTML(lead);
@@ -269,15 +287,23 @@ function buildScoreFormHTML(lead) {
     },
     finance: {
       title: '💰 PART 3: Financial & Bank Readiness',
-      ask:   ['Comfortable with Interest free CM Yuva loan?', 'Aadhaar/PAN ready?', 'Can arrange 5–10% margin? (eg. 25k margin money to be arranged 1 time to get the remaining finanicial investment)'],
+      ask:   ['Comfortable with Interest free CM Yuva loan?', 'Aadhaar/PAN ready?', 'Can arrange 5–10% margin?'],
       flag:  'Wants machine without loan process'
     },
     mindset: {
       title: '⚡ PART 4: Business and Learning Mindset',
-      ask:   ['Will come for training to the skilling centre in the chosen district','Ready to do the paper work with the CM Yuva Support','Income aim for Year 1?', 'Open to learning hygiene/costing?', 'Interested in scaling up?'],
+      ask:   ['Will come for training to the skilling centre', 'Ready to do the paper work with CM Yuva Support', 'Income aim for Year 1?', 'Open to learning hygiene/costing?', 'Interested in scaling up?'],
       flag:  'Fixed expectations, resistant to training'
     }
   };
+
+  const dispConfig = {
+    'drop':           { label: '🗑️ Drop',              color: '#6b7280', border: '#374151' },
+    'info-requested': { label: '📋 Info Requested',    color: '#7c3aed', border: '#4c1d95' },
+    'callback':       { label: '📞 Call Back',         color: '#0ea5e9', border: '#0369a1' },
+  };
+
+  const activeDisp = State.currentDisposition;
 
   return `
   <div class="lead-detail-view">
@@ -289,7 +315,7 @@ function buildScoreFormHTML(lead) {
           <span>📞 ${lead.phone_number || '—'}</span> |
           <span>📍 ${lead.target_city || '—'}</span> |
           <span>👥 ${lead.lead_alloc || 'Unassigned'}</span> |
-          <span>${lead.intent_purpose || 'Unassigned'}</span> |
+          <span>${lead.intent_purpose || 'Unassigned'}</span>
         </div>
       </div>
       <div id="score-summary" class="summary-badge" style="display:none;">
@@ -298,14 +324,52 @@ function buildScoreFormHTML(lead) {
       </div>
     </div>
 
+    <!-- ── QUICK DISPOSITION BAR ── -->
+    <div class="disposition-bar">
+      <span class="disp-label">Quick Disposition:</span>
+      ${Object.entries(dispConfig).map(([key, cfg]) => `
+        <button
+          class="disp-btn ${activeDisp === key ? 'active' : ''}"
+          id="disp-btn-${key}"
+          style="--disp-color:${cfg.color};--disp-border:${cfg.border}"
+          onclick="selectDisposition('${key}')">
+          ${cfg.label}
+        </button>
+      `).join('')}
+      ${activeDisp ? `<button class="disp-btn disp-clear" onclick="clearDisposition()">✕ Clear</button>` : ''}
+    </div>
+
+    <!-- ── DISPOSITION SAVE PANEL (shown when disposition selected) ── -->
+    <div id="disp-panel" class="disp-panel" style="display:${activeDisp ? 'block' : 'none'}">
+      <div class="disp-panel-inner" id="disp-panel-inner"
+           style="border-color:${activeDisp ? dispConfig[activeDisp]?.color : '#333'}">
+        <div class="disp-panel-title" id="disp-panel-title"
+             style="color:${activeDisp ? dispConfig[activeDisp]?.color : '#fff'}">
+          ${activeDisp ? dispConfig[activeDisp]?.label : ''} — Add Notes
+        </div>
+        <textarea
+          id="disp-notes"
+          class="disp-notes-area"
+          placeholder="Notes are required before saving this disposition..."
+          oninput="updateDispositionSaveBtn()"
+        >${State.currentNotes || ''}</textarea>
+        <div id="disp-notes-error" class="disp-notes-error" style="display:none">
+          ⚠ Notes are mandatory. Please describe the reason before saving.
+        </div>
+        <button id="disp-save-btn" class="disp-save-btn" onclick="saveDisposition()">
+          Save Disposition →
+        </button>
+      </div>
+    </div>
+
     <div class="scoring-container">
       <div class="script-column">
         <div class="info-card">
           <h3>🧾 The "Must-Have" Check</h3>
-          <p>Residence: Resident of UP (Kanpur, Lucknow, Noida, Ghaziabad, Gorakhpur,Ayodhya, Varanasi)?<br/>
-          Age: 21 - 40 years Age?<br/>
+          <p>Residence: Resident of UP (Kanpur, Lucknow, Noida, Ghaziabad, Gorakhpur, Ayodhya, Varanasi)?<br/>
+          Age: 21–40 years?<br/>
           Education: 8th pass or above<br/>
-          Loan: willingness to take a interest free bank loan for starting the business? (Must not expect a 100% free grant).</p>
+          Loan: willingness to take an interest-free bank loan?</p>
         </div>
         ${Object.entries(scripts).map(([, s]) => `
           <div class="script-section">
@@ -314,7 +378,7 @@ function buildScoreFormHTML(lead) {
             <div class="script-flag">🚩 ${s.flag}</div>
           </div>
         `).join('')}
-       </div>
+      </div>
 
       <div class="input-column">
         <div class="scoring-board">
@@ -342,7 +406,7 @@ function buildScoreFormHTML(lead) {
           `).join('')}
 
           <div class="flags-card">
-            <h4>🚩 Mandatory Red Flags (if selected any 1 of these, the profile will be auto-rejected)</h4>
+            <h4>🚩 Mandatory Red Flags (any 1 = auto-reject)</h4>
             <div class="flag-list">
               ${RED_FLAGS.map((f, i) => `
                 <label class="flag-pill" id="flag-label-${i}">
@@ -353,7 +417,7 @@ function buildScoreFormHTML(lead) {
           </div>
 
           <div class="notes-card">
-            <textarea id="caller-notes" placeholder="Internal notes...">${State.currentNotes || ''}</textarea>
+            <textarea id="caller-notes" placeholder="Internal notes..." oninput="updateSummary()">${State.currentNotes || ''}</textarea>
           </div>
 
           <button id="save-btn" class="save-btn disabled" onclick="saveLead()">
@@ -363,6 +427,183 @@ function buildScoreFormHTML(lead) {
       </div>
     </div>
   </div>`;
+}
+
+// ── DISPOSITION LOGIC ──────────────────────────────────────────
+function selectDisposition(key) {
+  State.currentDisposition = key;
+
+  const dispConfig = {
+    'drop':           { label: '🗑️ Drop',           color: '#6b7280' },
+    'info-requested': { label: '📋 Info Requested', color: '#7c3aed' },
+    'callback':       { label: '📞 Call Back',      color: '#0ea5e9' },
+  };
+  const cfg = dispConfig[key];
+
+  // Update button active states
+  ['drop','info-requested','callback'].forEach(k => {
+    document.getElementById(`disp-btn-${k}`)?.classList.toggle('active', k === key);
+  });
+
+  // Add clear button if not already there
+  if (!document.querySelector('.disp-clear')) {
+    const bar = document.querySelector('.disposition-bar');
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'disp-btn disp-clear';
+    clearBtn.textContent = '✕ Clear';
+    clearBtn.onclick = clearDisposition;
+    bar.appendChild(clearBtn);
+  }
+
+  if (key === 'info-requested') {
+    // ── INFO REQUESTED: hide notes-only panel, keep scoring active ──
+    const dispPanel = document.getElementById('disp-panel');
+    if (dispPanel) dispPanel.style.display = 'none';
+
+    // Show inline banner above scoring board
+    const existing = document.getElementById('info-req-banner');
+    if (!existing) {
+      const board = document.querySelector('.scoring-board');
+      if (board) {
+        const banner = document.createElement('div');
+        banner.id = 'info-req-banner';
+        banner.className = 'info-req-banner';
+        banner.innerHTML = `
+          <span style="color:#7c3aed;font-size:13px;">📋</span>
+          <span><b style="color:#7c3aed">Info Requested</b> — Score the lead as normal.
+          Notes are mandatory. Status will be set from the score once all sections are done.</span>`;
+        board.insertBefore(banner, board.firstChild);
+      }
+    }
+    // Make caller-notes visually required
+    const notesEl = document.getElementById('caller-notes');
+    if (notesEl) {
+      notesEl.placeholder = 'Required: What information was requested from the lead?';
+      notesEl.style.borderColor = '#4c1d95';
+    }
+    updateSummary();
+
+  } else {
+    // ── DROP / CALLBACK: show notes-only panel, scoring not needed ──
+    const existingBanner = document.getElementById('info-req-banner');
+    if (existingBanner) existingBanner.remove();
+
+    const dispPanel = document.getElementById('disp-panel');
+    const inner     = document.getElementById('disp-panel-inner');
+    const title     = document.getElementById('disp-panel-title');
+    if (dispPanel) dispPanel.style.display = 'block';
+    if (inner)     inner.style.borderColor = cfg.color;
+    if (title)     { title.textContent = `${cfg.label} — Add Notes`; title.style.color = cfg.color; }
+
+    // Pre-fill notes textarea in the disp panel
+    const dispNotesEl = document.getElementById('disp-notes');
+    if (dispNotesEl) dispNotesEl.value = State.currentNotes || '';
+
+    updateDispositionSaveBtn();
+  }
+}
+
+function clearDisposition() {
+  State.currentDisposition = null;
+  ['drop','info-requested','callback'].forEach(k => {
+    document.getElementById(`disp-btn-${k}`)?.classList.remove('active');
+  });
+  document.querySelector('.disp-clear')?.remove();
+
+  // Hide notes-only panel
+  const panel = document.getElementById('disp-panel');
+  if (panel) panel.style.display = 'none';
+
+  // Remove info-requested banner
+  document.getElementById('info-req-banner')?.remove();
+
+  // Reset caller-notes styling
+  const notesEl = document.getElementById('caller-notes');
+  if (notesEl) {
+    notesEl.placeholder = 'Internal notes...';
+    notesEl.style.borderColor = '';
+  }
+  updateSummary();
+}
+
+function updateDispositionSaveBtn() {
+  const btn   = document.getElementById('disp-save-btn');
+  const notes = (document.getElementById('disp-notes')?.value || '').trim();
+  const errEl = document.getElementById('disp-notes-error');
+  if (!btn) return;
+  if (notes.length > 0) {
+    btn.classList.add('ready');
+    btn.textContent = 'Save Disposition →';
+    if (errEl) errEl.style.display = 'none';
+  } else {
+    btn.classList.remove('ready');
+    btn.textContent = 'Add notes to save';
+  }
+}
+
+async function saveDisposition() {
+  const disp  = State.currentDisposition;
+  const notes = (document.getElementById('disp-notes')?.value || '').trim();
+  const errEl = document.getElementById('disp-notes-error');
+
+  if (!notes) {
+    if (errEl) errEl.style.display = 'block';
+    document.getElementById('disp-notes')?.focus();
+    return;
+  }
+
+  const lead = State.leads.find(l => l.id === State.currentLeadId);
+  if (!lead || !disp) return;
+
+  const payload = {
+    lead_id:         lead.lead_id || lead.id,
+    full_name:       lead.full_name,
+    phone_number:    lead.phone_number,
+    city:            lead.city,
+    email:           lead.email,
+    gender:          lead.gender,
+    dob:             lead.dob,
+    education_level: lead.education_level,
+    age:             lead.age,
+    ad_name:         lead.ad_name,
+    platform:        lead.platform,
+    intent_purpose:  lead.intent_purpose,
+    time_commitment: lead.time_commitment,
+    target_city:     lead.target_city,
+    lead_alloc:      lead.lead_alloc,
+    // Keep existing scores/flags if any
+    scores:          State.currentScores || {},
+    flags:           State.currentFlags  || {},
+    notes,
+    total:           lead.total || null,
+    flag_count:      Object.values(State.currentFlags || {}).filter(Boolean).length,
+    status:          disp,
+    updated_at:      new Date().toISOString()
+  };
+
+  try {
+    const { data, error } = await _db
+      .from('scored_leads')
+      .upsert(payload, { onConflict: 'lead_id' })
+      .select();
+
+    if (error) {
+      console.error('❌ SUPABASE ERROR:', error);
+      showToast('Save failed: ' + error.message, 'error');
+    } else {
+      console.log('✅ DISPOSITION SAVED:', data);
+      State.scoredMap[State.currentLeadId] = payload;
+      State.leads = State.leads.map(l =>
+        l.id === State.currentLeadId ? { ...l, ...payload } : l
+      );
+      const labels = { 'drop': 'Dropped', 'info-requested': 'Info Requested', 'callback': 'Call Back' };
+      showToast(`✓ Saved: ${labels[disp]}`, 'success');
+      renderLeadGrid();
+    }
+  } catch (err) {
+    console.error('💥 CATCH ERROR:', err);
+    showToast('Network error: ' + err.message, 'error');
+  }
 }
 
 // ── RESTORE FORM STATE ─────────────────────────────────────────
@@ -379,6 +620,11 @@ function restoreFormState() {
     const cb    = label?.querySelector('input[type=checkbox]');
     if (cb) { cb.checked = true; label.classList.add('active'); }
   });
+
+  // Restore disposition panel if applicable
+  if (State.currentDisposition) {
+    selectDisposition(State.currentDisposition);
+  }
 }
 
 // ── SCORE CHANGE ───────────────────────────────────────────────
@@ -422,6 +668,7 @@ function updateSummary() {
   const flagCount = Object.values(State.currentFlags).filter(Boolean).length;
   const allDone   = SECTIONS.every(s => State.currentScores[s.id]);
   const done      = SECTIONS.filter(s => State.currentScores[s.id]).length;
+  const disp      = State.currentDisposition;
 
   if (total > 0) {
     const st      = getStatus(total, flagCount);
@@ -436,18 +683,54 @@ function updateSummary() {
     }
   }
 
-  const saveBtn = document.getElementById('save-btn');
+  const saveBtn  = document.getElementById('save-btn');
   if (!saveBtn) return;
-  if (allDone) {
-    saveBtn.className   = 'save-btn ready';
-    saveBtn.textContent = 'Save Qualification Score →';
+  const notesVal = (document.getElementById('caller-notes')?.value || '').trim();
+
+  if (disp === 'info-requested') {
+    // Info Requested: all sections scored + notes mandatory, status from scores
+    const notesOk = notesVal.length > 0;
+    let notesErrEl = document.getElementById('info-req-notes-error');
+
+    if (allDone && notesOk) {
+      saveBtn.className   = 'save-btn ready info-req-ready';
+      saveBtn.textContent = 'Save as Info Requested →';
+      if (notesErrEl) notesErrEl.style.display = 'none';
+    } else if (allDone && !notesOk) {
+      saveBtn.className   = 'save-btn disabled';
+      saveBtn.textContent = '⚠ Add notes before saving';
+      if (!notesErrEl) {
+        const notesCard = document.querySelector('.notes-card');
+        if (notesCard) {
+          notesErrEl = document.createElement('div');
+          notesErrEl.id = 'info-req-notes-error';
+          notesErrEl.className = 'disp-notes-error';
+          notesErrEl.style.margin = '6px 0 0';
+          notesErrEl.textContent = '⚠ Notes are mandatory. Describe what information was requested.';
+          notesCard.after(notesErrEl);
+        }
+      } else {
+        notesErrEl.style.display = 'block';
+      }
+    } else {
+      saveBtn.className   = 'save-btn disabled';
+      saveBtn.textContent = `Score all sections to save (${done} / ${SECTIONS.length} done)`;
+      if (notesErrEl) notesErrEl.style.display = 'none';
+    }
   } else {
-    saveBtn.className   = 'save-btn disabled';
-    saveBtn.textContent = `Score all sections to save (${done} / 5 done)`;
+    // Normal scoring — remove any info-req error element
+    document.getElementById('info-req-notes-error')?.remove();
+    if (allDone) {
+      saveBtn.className   = 'save-btn ready';
+      saveBtn.textContent = 'Save Qualification Score →';
+    } else {
+      saveBtn.className   = 'save-btn disabled';
+      saveBtn.textContent = `Score all sections to save (${done} / ${SECTIONS.length} done)`;
+    }
   }
 }
 
-// ── SAVE LEAD ──────────────────────────────────────────────────
+// ── SAVE LEAD (full scoring) ───────────────────────────────────
 async function saveLead() {
   const lead = State.leads.find(l => l.id === State.currentLeadId);
   if (!lead) return;
@@ -455,10 +738,34 @@ async function saveLead() {
   const total      = calcTotal(State.currentScores);
   const flagCount  = Object.values(State.currentFlags).filter(Boolean).length;
   const statusObj  = getStatus(total, flagCount);
+  const notes      = document.getElementById('caller-notes')?.value || '';
+  const disp       = State.currentDisposition;
 
-  // ✅ Merge score fields INTO the full lead row — no fields get wiped
+  // Info Requested: enforce mandatory notes
+  if (disp === 'info-requested' && !notes.trim()) {
+    const notesEl = document.getElementById('caller-notes');
+    if (notesEl) { notesEl.focus(); notesEl.style.borderColor = '#7c3aed'; }
+    let errEl = document.getElementById('info-req-notes-error');
+    if (!errEl) {
+      const notesCard = document.querySelector('.notes-card');
+      if (notesCard) {
+        errEl = document.createElement('div');
+        errEl.id = 'info-req-notes-error';
+        errEl.className = 'disp-notes-error';
+        errEl.style.margin = '6px 0 0';
+        errEl.textContent = '⚠ Notes are mandatory. Describe what information was requested.';
+        notesCard.after(errEl);
+      }
+    } else { errEl.style.display = 'block'; }
+    return;
+  }
+
+  // Determine final status:
+  // info-requested keeps its disposition label as status
+  // all others use score-calculated status
+  const finalStatus = disp === 'info-requested' ? 'info-requested' : statusObj.key;
+
   const payload = {
-    // --- Preserve all original lead data ---
     lead_id:         lead.lead_id || lead.id,
     full_name:       lead.full_name,
     phone_number:    lead.phone_number,
@@ -474,20 +781,19 @@ async function saveLead() {
     time_commitment: lead.time_commitment,
     target_city:     lead.target_city,
     lead_alloc:      lead.lead_alloc,
-    // --- Score fields ---
     scores:          State.currentScores,
     flags:           State.currentFlags,
-    notes:           document.getElementById('caller-notes')?.value || '',
+    notes:           notes,
     total,
     flag_count:      flagCount,
-    status:          statusObj.key,
+    status:          finalStatus,
     updated_at:      new Date().toISOString()
   };
 
   try {
     const { data, error } = await _db
       .from('scored_leads')
-      .upsert(payload, { onConflict: 'lead_id' })  // ✅ removed ignoreDuplicates
+      .upsert(payload, { onConflict: 'lead_id' })
       .select();
 
     if (error) {
@@ -507,7 +813,6 @@ async function saveLead() {
     showToast('Network error: ' + err.message, 'error');
   }
 }
-
 
 // ── DASHBOARD ──────────────────────────────────────────────────
 function renderDashboard() {
@@ -540,9 +845,12 @@ function renderDashboard() {
         <div class="dash-col">
           <section class="dash-card">
             <h3>Qualification Breakdown</h3>
-            ${renderProgressBar('Fast-Track', scoredLeads.filter(l => l.status === 'fast-track').length, scoredLeads.length, '#16a34a')}
-            ${renderProgressBar('Nurture',    scoredLeads.filter(l => l.status === 'nurture').length,     scoredLeads.length, '#d97706')}
-            ${renderProgressBar('Rejected',   scoredLeads.filter(l => ['auto-reject','not-suitable','rejected'].includes(l.status)).length, scoredLeads.length, '#dc2626')}
+            ${renderProgressBar('Fast-Track',     scoredLeads.filter(l => l.status === 'fast-track').length,     scoredLeads.length, '#16a34a')}
+            ${renderProgressBar('Nurture',         scoredLeads.filter(l => l.status === 'nurture').length,         scoredLeads.length, '#d97706')}
+            ${renderProgressBar('Rejected',        scoredLeads.filter(l => ['auto-reject','not-suitable','rejected'].includes(l.status)).length, scoredLeads.length, '#dc2626')}
+            ${renderProgressBar('Dropped',         scoredLeads.filter(l => l.status === 'drop').length,            scoredLeads.length, '#6b7280')}
+            ${renderProgressBar('Info Requested',  scoredLeads.filter(l => l.status === 'info-requested').length,  scoredLeads.length, '#7c3aed')}
+            ${renderProgressBar('Call Back',       scoredLeads.filter(l => l.status === 'callback').length,        scoredLeads.length, '#0ea5e9')}
           </section>
           <section class="dash-card">
             <h3>Team Member Load</h3>
@@ -559,7 +867,7 @@ function renderDashboard() {
         </div>
         <div class="dash-col">
           <section class="dash-card">
-            <h3> Target Cities</h3>
+            <h3>Target Cities</h3>
             <div class="stat-list">
               ${getStatArray('target_city').slice(0, 8).map(([n, c]) => `<div class="stat-row"><span>${n}</span><b>${c}</b></div>`).join('')}
             </div>
@@ -642,9 +950,6 @@ async function processExcelToSupabase(rows) {
       time_commitment: row['क्या_आप_अपने_फूड_बिज़नेस_को_समय_देने_के_लिए_तैयार_हैं?'] || '',
       target_city:     row.Target_City     || '',
       lead_alloc:      row.Lead_Allocation || 'Unassigned',
-      // ✅ DO NOT include status/notes/scores/flags/total here
-      // They default to DB defaults on first insert,
-      // and are ignored on conflict (existing rows keep their scored data)
       updated_at:      new Date().toISOString()
     });
   });
@@ -653,10 +958,7 @@ async function processExcelToSupabase(rows) {
   try {
     const { error } = await _db
       .from('scored_leads')
-      .upsert(leads, { 
-        onConflict: 'lead_id',
-        ignoreDuplicates: true  // ✅ For import: skip rows that already exist
-      });
+      .upsert(leads, { onConflict: 'lead_id', ignoreDuplicates: true });
     if (error) throw error;
     showToast(`✓ ${leads.length} leads imported`, 'success');
     refreshAll();
@@ -665,6 +967,7 @@ async function processExcelToSupabase(rows) {
     showToast('Upload error: ' + err.message, 'error');
   }
 }
+
 // ── HELPERS ────────────────────────────────────────────────────
 function setSyncStatus(msg) {
   const el = document.getElementById('sync-status');

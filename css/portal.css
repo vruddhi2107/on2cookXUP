@@ -380,4 +380,211 @@ html, body { height: 100%; overflow: hidden; }
 #filter-status {
   min-width: 140px;
   font-weight: 500;
+}/* ═══════════════════════════════════════════════════════════════
+   DISPOSITION STYLES — Add to portal.css
+   (Paste this block at the bottom of your portal.css file)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── DISPOSITION BAR ───────────────────────────────────────── */
+.disposition-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 18px;
+  border-bottom: 1px solid #1a1a1a;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.disp-label {
+  font-size: 10px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.disp-btn {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #666;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: var(--font-mono, monospace);
+  white-space: nowrap;
+}
+
+.disp-btn:hover {
+  border-color: var(--disp-color, #888);
+  color: var(--disp-color, #ccc);
+  background: rgba(255,255,255,0.03);
+}
+
+.disp-btn.active {
+  background: color-mix(in srgb, var(--disp-color, #888) 12%, transparent);
+  border-color: var(--disp-color, #888);
+  color: var(--disp-color, #ccc);
+}
+
+/* Drop button */
+#disp-btn-drop           { --disp-color: #6b7280; --disp-border: #374151; }
+/* Info Requested button */
+#disp-btn-info-requested { --disp-color: #7c3aed; --disp-border: #4c1d95; }
+/* Callback button */
+#disp-btn-callback       { --disp-color: #0ea5e9; --disp-border: #0369a1; }
+
+/* Clear button */
+.disp-clear {
+  --disp-color: #555 !important;
+  border-color: #222 !important;
+  color: #444 !important;
+  font-size: 10px !important;
+  padding: 6px 12px !important;
+}
+.disp-clear:hover {
+  border-color: #444 !important;
+  color: #888 !important;
+}
+
+/* ── DISPOSITION PANEL ─────────────────────────────────────── */
+.disp-panel {
+  margin-bottom: 24px;
+  animation: fadeSlideIn 0.2s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.disp-panel-inner {
+  background: #050505;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 20px;
+  border-top-width: 2px;
+  transition: border-color 0.2s;
+}
+
+.disp-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  transition: color 0.2s;
+}
+
+.disp-notes-area {
+  width: 100%;
+  min-height: 100px;
+  background: #0d0d0d;
+  border: 1px solid #222;
+  border-radius: 4px;
+  color: #d1d1d1;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.7;
+  font-family: var(--font-mono, monospace);
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.disp-notes-area:focus {
+  border-color: #444;
+}
+
+.disp-notes-area::placeholder {
+  color: #3a3a3a;
+}
+
+/* Error message */
+.disp-notes-error {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+/* Disposition save button */
+.disp-save-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px;
+  background: #111;
+  border: 1px solid #222;
+  color: #444;
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  cursor: not-allowed;
+  transition: all 0.2s;
+}
+
+.disp-save-btn.ready {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.disp-save-btn.ready:hover {
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+/* ── UPDATED STATUS BADGES (grid table) ─────────────────────── */
+/* 
+  The getStatusBadge() function handles colors inline via style attrs.
+  These are supplementary fallback badge styles for new statuses.
+*/
+.badge[data-status="drop"]           { color: #6b7280; border-color: #6b7280; }
+.badge[data-status="info-requested"] { color: #7c3aed; border-color: #7c3aed; }
+.badge[data-status="callback"]       { color: #0ea5e9; border-color: #0ea5e9; }
+
+/* ── INFO REQUESTED BANNER (inside scoring board) ──────────── */
+.info-req-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-left: 3px solid #7c3aed;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #a78bfa;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+/* Save button variant for info-requested */
+.save-btn.info-req-ready {
+  background: #4c1d95;
+  color: #ede9fe;
+  border: 1px solid #6d28d9;
+  cursor: pointer;
+}
+.save-btn.info-req-ready:hover {
+  background: #5b21b6;
+}
+
+/* Notes textarea when required (info-requested mode) */
+#caller-notes:focus {
+  border-color: #444;
+  outline: none;
 }
