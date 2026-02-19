@@ -344,3 +344,40 @@ html, body { height: 100%; overflow: hidden; }
 /* ── MINI PROGRESS BAR (lead list) ───────────── */
 .mini-bar      { height: 2px; background: var(--bg-3); margin-top: 6px; overflow: hidden; }
 .mini-bar-fill { height: 100%; transition: width 0.4s; }
+/* ── LOGO ──────────────────────────────────────── */
+.portal-logo-img {
+  height: 32px !important;
+  width: auto;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+/* Keep existing placeholder styles as fallback */
+.portal-logo-placeholder {
+  display: none; /* Hide when real logo is present */
+}
+
+/* ── STATUS FILTER ─────────────────────────────── */
+.grid-controls {
+  padding: 15px 20px;
+  display: flex; gap: 12px; align-items: center;
+  border-bottom: 1px solid var(--border-1);
+  background: #050505;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+.grid-controls select {
+  background: #111; 
+  border: 1px solid var(--border-2);
+  color: white; 
+  padding: 8px 12px; 
+  font-size: 12px; 
+  border-radius: 4px;
+  min-width: 120px; /* Status dropdown needs space */
+}
+
+/* Status filter specific styling */
+#filter-status {
+  min-width: 140px;
+  font-weight: 500;
+}

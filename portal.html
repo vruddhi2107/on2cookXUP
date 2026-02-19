@@ -22,13 +22,9 @@
 
       <!-- LOGO (replace placeholder) -->
       <div class="portal-logo">
-        <!--
-          Replace with:
-            <img src="assets/logo.png" alt="Your Brand" class="portal-logo-img" />
-        -->
-        <div class="portal-logo-placeholder">LOGO</div>
+        <img src="On2cook_Logo_White.png" alt="CM Yuva × On2Cook" class="portal-logo-img" />
         <div class="portal-logo-sep"></div>
-        <span class="portal-logo-name">CM Yuva × On2Cook</span>
+        <span class="portal-logo-name">Lead Portal</span>
       </div>
 
       <div class="tab-sep"></div>
@@ -59,12 +55,27 @@
 
    <div class="full-width-container">
     <div class="grid-controls">
-      <input type="text" id="search-input" placeholder="Search leads..." oninput="renderLeadGrid()">
-      <select id="filter-city" onchange="renderLeadGrid()"></select>
-      <select id="filter-alloc" onchange="renderLeadGrid()"></select>
-      <select id="filter-platform" onchange="renderLeadGrid()"></select>
-      <div id="leads-meta" class="meta-count"></div>
-    </div>
+        <input type="text" id="search-input" placeholder="Search leads..." oninput="renderLeadGrid()">
+        <select id="filter-city" onchange="renderLeadGrid()">
+          <option value="">All Cities</option>
+        </select>
+        <select id="filter-alloc" onchange="renderLeadGrid()">
+          <option value="">All Team</option>
+        </select>
+        <select id="filter-platform" onchange="renderLeadGrid()">
+          <option value="">All Platforms</option>
+        </select>
+        <select id="filter-status" onchange="renderLeadGrid()">
+          <option value="">All Status</option>
+          <option value="Open">Open</option>
+          <option value="fast-track">Fast Track</option>
+          <option value="nurture">Nurture</option>
+          <option value="auto-reject">Auto Reject</option>
+          <option value="not-suitable">Not Suitable</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <div id="leads-meta" class="meta-count"></div>
+      </div>
 
     <!-- ── CONTENT PANEL ── -->
     <div class="content-panel" id="content-panel">

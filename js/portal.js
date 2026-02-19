@@ -103,21 +103,34 @@ async function loadLeads() {
 }
 
 // ── FILTERS ────────────────────────────────────────────────────
+// ── UPDATED FILTERS POPULATE ─────────────────────
 function populateFilters() {
   const getUnique = (key) =>
     [...new Set(State.leads.map(l => l[key]).filter(Boolean))].sort();
 
+  // Existing filters...
   const citySel  = document.getElementById('filter-city');
   const allocSel = document.getElementById('filter-alloc');
   const platSel  = document.getElementById('filter-platform');
-
+  
+  // NEW: Status filter (uses scoredMap status)
+  const statusSel = document.getElementById('filter-status');
+  
   if (citySel)  citySel.innerHTML  = '<option value="">All Target Cities</option>'
     + getUnique('target_city').map(c => `<option value="${c}">${c}</option>`).join('');
   if (allocSel) allocSel.innerHTML = '<option value="">All Team Members</option>'
     + getUnique('lead_alloc').map(o => `<option value="${o}">${o}</option>`).join('');
-  if (platSel)  platSel.innerHTML  = '<option value="">All Platforms</option>'
+  if (platSel)  platSel.innerHTML = '<option value="">All Platforms</option>'
     + getUnique('platform').map(p => `<option value="${p}">${p}</option>`).join('');
+    
+  // NEW: Populate status from scoredMap
+  if (statusSel) {
+    const statusOptions = ['Open', 'fast-track', 'nurture', 'auto-reject', 'not-suitable', 'rejected'];
+    statusSel.innerHTML = '<option value="">All Status</option>' + 
+      statusOptions.map(s => `<option value="${s}">${s.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>`).join('');
+  }
 }
+
 
 // ── LEAD GRID ──────────────────────────────────────────────────
 function renderLeadGrid() {
@@ -128,16 +141,19 @@ function renderLeadGrid() {
   const cityF  = document.getElementById('filter-city')?.value     || '';
   const allocF = document.getElementById('filter-alloc')?.value    || '';
   const platF  = document.getElementById('filter-platform')?.value || '';
+  const statusF = document.getElementById('filter-status')?.value  || '';
 
   const filtered = State.leads.filter(l => {
     const matchSearch = !search ||
       (l.full_name    || '').toLowerCase().includes(search) ||
       (l.phone_number || '').includes(search);
-    const matchCity  = !cityF  || l.target_city === cityF;
-    const matchAlloc = !allocF || l.lead_alloc  === allocF;
-    const matchPlat  = !platF  || l.platform    === platF;
-    return matchSearch && matchCity && matchAlloc && matchPlat;
-  });
+    const matchCity   = !cityF  || l.target_city === cityF;
+    const matchAlloc  = !allocF || l.lead_alloc  === allocF;
+    const matchPlat   = !platF  || l.platform    === platF;
+    const leadStatus  = l.status || 'Open';              // ← read from lead directly
+    const matchStatus = !statusF || leadStatus === statusF;
+    return matchSearch && matchCity && matchAlloc && matchPlat && matchStatus;
+});
 
   const meta = document.getElementById('leads-meta');
   if (meta) meta.textContent = `${filtered.length} leads`;
@@ -158,10 +174,20 @@ function renderLeadGrid() {
         </thead>
         <tbody>
           ${filtered.map(l => {
-            const sc = State.scoredMap[l.id];
-            const st = sc
-              ? getStatus(sc.total, sc.flag_count)
-              : { label: 'PENDING', color: 'var(--text-faint)' };
+            const sc = State.scoredMap[l.id] 
+        || State.scoredMap[l.lead_id] 
+        || State.scoredMap[String(l.id).trim()];
+            // REPLACE the st block in filtered.map() with:
+const leadStatus = l.status || 'Open';   // ← direct, no scoredMap lookup needed
+const total      = l.total  || null;
+
+let st;
+if (leadStatus === 'fast-track')   st = { label: 'Fast Track',   color: '#16a34a' };
+else if (leadStatus === 'nurture') st = { label: 'Nurture',      color: '#d97706' };
+else if (leadStatus === 'auto-reject') st = { label: 'Auto Reject', color: '#dc2626' };
+else if (leadStatus === 'not-suitable') st = { label: 'Not Suitable', color: '#dc2626' };
+else                               st = { label: 'Open',          color: 'var(--text-faint)' };
+
             return `
               <tr>
                 <td>
@@ -172,7 +198,7 @@ function renderLeadGrid() {
                 <td style="color:var(--red);font-weight:600;">${l.lead_alloc || 'Unassigned'}</td>
                 <td><span class="plat-tag">${l.platform || 'FB'}</span></td>
                 <td><span class="badge" style="color:${st.color};border-color:${st.color}">${st.label}</span></td>
-                <td><b style="font-size:14px;color:${st.color}">${sc?.total ?? '—'}</b></td>
+<td><b style="font-size:14px;color:${st.color}">${total ?? '—'}</b></td>
                 <td><button class="icon-btn" onclick="selectLead('${l.id}')">Open Profile</button></td>
               </tr>`;
           }).join('')}
@@ -180,6 +206,7 @@ function renderLeadGrid() {
       </table>
     </div>`;
 }
+
 
 // ── TABS ───────────────────────────────────────────────────────
 function switchTab(tab) {
@@ -216,7 +243,7 @@ function selectLead(id) {
   const lead = State.leads.find(l => l.id === id);
   if (!lead) return;
 
-  const sc = State.scoredMap[id];
+  const sc = State.scoredMap[id] || State.scoredMap[String(id).trim()]
   State.currentScores = sc ? { ...sc.scores } : {};
   State.currentFlags  = sc ? { ...sc.flags  } : {};
   State.currentNotes  = sc ? (sc.notes || '') : '';
@@ -232,22 +259,22 @@ function buildScoreFormHTML(lead) {
   const scripts = {
     motivation: {
       title: '🧠 PART 1: Motivation & Ownership',
-      ask:   ['What made you apply?', 'Working, studying, or full-time?', 'Why this business, and will you run it full-time yourself?'],
+      ask:   ['What made you apply?', 'Working, studying, or full-time?', 'Who will run this business? You or Someone else?'],
       flag:  'I applied because someone told me to try'
     },
     ops: {
       title: '🍽️ PART 2: Food & Ops Readiness',
-      ask:   ['Experience in cooking/handling?', 'Where will you operate?', 'Comfortable with early/late hours?'],
+      ask:   ['Experience in cooking/handling?', 'Where will you operate? (house/rental space/owned space)','Past experience of running any business'],
       flag:  'Wants income but no daily involvement'
     },
     finance: {
       title: '💰 PART 3: Financial & Bank Readiness',
-      ask:   ['Comfortable with CM Yuva loan?', 'Aadhaar/PAN ready?', 'Can arrange 5–10% margin?'],
+      ask:   ['Comfortable with Interest free CM Yuva loan?', 'Aadhaar/PAN ready?', 'Can arrange 5–10% margin? (eg. 25k margin money to be arranged 1 time to get the remaining finanicial investment)'],
       flag:  'Wants machine without loan process'
     },
     mindset: {
-      title: '⚡ PART 4: Business Mindset',
-      ask:   ['Income aim for Year 1?', 'Open to learning hygiene/costing?', 'Interested in scaling up?'],
+      title: '⚡ PART 4: Business and Learning Mindset',
+      ask:   ['Will come for training to the skilling centre in the chosen district','Ready to do the paper work with the CM Yuva Support','Income aim for Year 1?', 'Open to learning hygiene/costing?', 'Interested in scaling up?'],
       flag:  'Fixed expectations, resistant to training'
     }
   };
@@ -261,12 +288,13 @@ function buildScoreFormHTML(lead) {
         <div class="detail-meta">
           <span>📞 ${lead.phone_number || '—'}</span> |
           <span>📍 ${lead.target_city || '—'}</span> |
-          <span>👥 ${lead.lead_alloc || 'Unassigned'}</span>
+          <span>👥 ${lead.lead_alloc || 'Unassigned'}</span> |
+          <span>${lead.intent_purpose || 'Unassigned'}</span> |
         </div>
       </div>
       <div id="score-summary" class="summary-badge" style="display:none;">
         <div id="sum-num">0</div>
-        <div id="sum-status">PENDING</div>
+        <div id="sum-status">Open</div>
       </div>
     </div>
 
@@ -274,9 +302,10 @@ function buildScoreFormHTML(lead) {
       <div class="script-column">
         <div class="info-card">
           <h3>🧾 The "Must-Have" Check</h3>
-          <p>Residence: Is the person a permanent resident of Uttar Pradesh?<br/>
-          Age: Is the person between 21 and 40 years old?<br/>
-          Loan: Is the person willing to take a ₹5 Lakh bank loan? (Must not expect a 100% free grant).</p>
+          <p>Residence: Resident of UP (Kanpur, Lucknow, Noida, Ghaziabad, Gorakhpur,Ayodhya, Varanasi)?<br/>
+          Age: 21 - 40 years Age?<br/>
+          Education: 8th pass or above<br/>
+          Loan: willingness to take a interest free bank loan for starting the business? (Must not expect a 100% free grant).</p>
         </div>
         ${Object.entries(scripts).map(([, s]) => `
           <div class="script-section">
@@ -313,7 +342,7 @@ function buildScoreFormHTML(lead) {
           `).join('')}
 
           <div class="flags-card">
-            <h4>🚩 Mandatory Red Flags</h4>
+            <h4>🚩 Mandatory Red Flags (if selected any 1 of these, the profile will be auto-rejected)</h4>
             <div class="flag-list">
               ${RED_FLAGS.map((f, i) => `
                 <label class="flag-pill" id="flag-label-${i}">
@@ -328,7 +357,7 @@ function buildScoreFormHTML(lead) {
           </div>
 
           <button id="save-btn" class="save-btn disabled" onclick="saveLead()">
-            Score all sections to save (0 / 5 done)
+            Score all sections to save (0 / ${SECTIONS.length} done)
           </button>
         </div>
       </div>
@@ -423,47 +452,50 @@ async function saveLead() {
   const lead = State.leads.find(l => l.id === State.currentLeadId);
   if (!lead) return;
 
-  const total     = calcTotal(State.currentScores);
+  // ✅ FIXED: Calculate BEFORE payload
+  const total = calcTotal(State.currentScores);
   const flagCount = Object.values(State.currentFlags).filter(Boolean).length;
-  const st        = getStatus(total, flagCount);
+  const statusObj = getStatus(total, flagCount); // Gets {key, label, color}
+  
+  console.log('📊 STATUS CALC:', { total, flagCount, status: statusObj.key });
 
   const payload = {
-    lead_id:         State.currentLeadId,
-    full_name:       lead.full_name       || '',
-    phone_number:    lead.phone_number    || '',
-    email:           lead.email           || '',
-    city:            lead.city            || '',
-    target_city:     lead.target_city     || '',
-    ad_name:         lead.ad_name         || '',
-    platform:        lead.platform        || '',
-    intent_purpose:  lead.intent_purpose  || '',
-    time_commitment: lead.time_commitment || '',
-    gender:          lead.gender          || '',
-    dob:             lead.dob             || '',
-    education_level: lead.education_level || '',
-    age:             lead.age ? parseInt(lead.age) : null,
-    lead_alloc:      lead.lead_alloc      || 'Unassigned',
-    scores:          State.currentScores,
-    flags:           State.currentFlags,
-    notes:           document.getElementById('caller-notes')?.value || '',
-    total,
-    flag_count:      flagCount,
-    status:          st.key,
-    updated_at:      new Date().toISOString()
+    lead_id: State.currentLeadId,
+    // ... other fields ...
+    scores: State.currentScores,
+    flags: State.currentFlags,
+    notes: document.getElementById('caller-notes')?.value || '',
+    total,  // ✅ Use calculated total
+    flag_count: flagCount,  // ✅ Use calculated flag count
+    status: statusObj.key,  // ✅ Use status.key (NOT status.label)
+    updated_at: new Date().toISOString()
   };
 
-  const { error } = await _db
-    .from('scored_leads')
-    .upsert(payload, { onConflict: 'lead_id' });
+  console.log('📦 PAYLOAD:', payload);
 
-  if (error) {
-    console.error('Save error:', error);
-    showToast('Error saving: ' + error.message, 'error');
-  } else {
-    State.scoredMap[State.currentLeadId] = payload;
-    showToast(`✓ Saved as ${st.label}`, 'success');
+  try {
+    const { data, error } = await _db
+      .from('scored_leads')
+      .upsert(payload, { onConflict: 'lead_id',ignoreDuplicates: true })
+      .select();
+
+    if (error) {
+      console.error('❌ SUPABASE ERROR:', error);
+      showToast('Save failed: ' + error.message, 'error');
+      renderLeadGrid(); // Revert to grid to avoid stale form state
+    } else {
+      console.log('✅ SAVE SUCCESS:', data);
+      State.scoredMap[State.currentLeadId] = payload;
+      State.leads = State.leads.map(l => l.id === State.currentLeadId ? { ...l, ...payload } : l);
+      showToast(`✓ Saved: ${payload.total}pts ${payload.status}`, 'success');
+      renderLeadGrid(); // Refresh grid to show new score
+    }
+  } catch (err) {
+    console.error('💥 CATCH ERROR:', err);
+    showToast('Network error: ' + err.message, 'error');
   }
 }
+
 
 // ── DASHBOARD ──────────────────────────────────────────────────
 function renderDashboard() {
@@ -515,7 +547,7 @@ function renderDashboard() {
         </div>
         <div class="dash-col">
           <section class="dash-card">
-            <h3>Top Target Cities</h3>
+            <h3> Target Cities</h3>
             <div class="stat-list">
               ${getStatArray('target_city').slice(0, 8).map(([n, c]) => `<div class="stat-row"><span>${n}</span><b>${c}</b></div>`).join('')}
             </div>
@@ -598,7 +630,7 @@ async function processExcelToSupabase(rows) {
       time_commitment: row['क्या_आप_अपने_फूड_बिज़नेस_को_समय_देने_के_लिए_तैयार_हैं?'] || '',
       target_city:     row.Target_City     || '',
       lead_alloc:      row.Lead_Allocation || 'Unassigned',
-      status:          'pending',
+      status:          'Open',
       updated_at:      new Date().toISOString()
     });
   });
