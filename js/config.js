@@ -24,6 +24,11 @@ const SECTIONS = [
 ];
 
 const RED_FLAGS = [
+  'Not a resident of UP',
+  'Not the right age (21-40)',
+  'Not Educated (8th pass minimum)',
+  'No interest in taking a loan',
+  'No interest in food business',
   'I applied because someone told me to try',
   'Wants income but no daily involvement', 
   'Wants machine without loan process',
