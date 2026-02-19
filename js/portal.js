@@ -452,43 +452,55 @@ async function saveLead() {
   const lead = State.leads.find(l => l.id === State.currentLeadId);
   if (!lead) return;
 
-  // ✅ FIXED: Calculate BEFORE payload
-  const total = calcTotal(State.currentScores);
-  const flagCount = Object.values(State.currentFlags).filter(Boolean).length;
-  const statusObj = getStatus(total, flagCount); // Gets {key, label, color}
-  
-  console.log('📊 STATUS CALC:', { total, flagCount, status: statusObj.key });
+  const total      = calcTotal(State.currentScores);
+  const flagCount  = Object.values(State.currentFlags).filter(Boolean).length;
+  const statusObj  = getStatus(total, flagCount);
 
+  // ✅ Merge score fields INTO the full lead row — no fields get wiped
   const payload = {
-    lead_id: State.currentLeadId,
-    // ... other fields ...
-    scores: State.currentScores,
-    flags: State.currentFlags,
-    notes: document.getElementById('caller-notes')?.value || '',
-    total,  // ✅ Use calculated total
-    flag_count: flagCount,  // ✅ Use calculated flag count
-    status: statusObj.key,  // ✅ Use status.key (NOT status.label)
-    updated_at: new Date().toISOString()
+    // --- Preserve all original lead data ---
+    lead_id:         lead.lead_id || lead.id,
+    full_name:       lead.full_name,
+    phone_number:    lead.phone_number,
+    city:            lead.city,
+    email:           lead.email,
+    gender:          lead.gender,
+    dob:             lead.dob,
+    education_level: lead.education_level,
+    age:             lead.age,
+    ad_name:         lead.ad_name,
+    platform:        lead.platform,
+    intent_purpose:  lead.intent_purpose,
+    time_commitment: lead.time_commitment,
+    target_city:     lead.target_city,
+    lead_alloc:      lead.lead_alloc,
+    // --- Score fields ---
+    scores:          State.currentScores,
+    flags:           State.currentFlags,
+    notes:           document.getElementById('caller-notes')?.value || '',
+    total,
+    flag_count:      flagCount,
+    status:          statusObj.key,
+    updated_at:      new Date().toISOString()
   };
-
-  console.log('📦 PAYLOAD:', payload);
 
   try {
     const { data, error } = await _db
       .from('scored_leads')
-      .upsert(payload, { onConflict: 'lead_id',ignoreDuplicates: true })
+      .upsert(payload, { onConflict: 'lead_id' })  // ✅ removed ignoreDuplicates
       .select();
 
     if (error) {
       console.error('❌ SUPABASE ERROR:', error);
       showToast('Save failed: ' + error.message, 'error');
-      renderLeadGrid(); // Revert to grid to avoid stale form state
     } else {
       console.log('✅ SAVE SUCCESS:', data);
       State.scoredMap[State.currentLeadId] = payload;
-      State.leads = State.leads.map(l => l.id === State.currentLeadId ? { ...l, ...payload } : l);
-      showToast(`✓ Saved: ${payload.total}pts ${payload.status}`, 'success');
-      renderLeadGrid(); // Refresh grid to show new score
+      State.leads = State.leads.map(l =>
+        l.id === State.currentLeadId ? { ...l, ...payload } : l
+      );
+      showToast(`✓ Saved: ${payload.total}pts · ${payload.status}`, 'success');
+      renderLeadGrid();
     }
   } catch (err) {
     console.error('💥 CATCH ERROR:', err);
