@@ -159,7 +159,7 @@ function renderLeadGrid() {
     const matchCity   = !cityF  || l.target_city === cityF;
     const matchAlloc  = !allocF || l.lead_alloc  === allocF;
     const matchPlat   = !platF  || l.platform    === platF;
-    const leadStatus  = l.status || 'Open';
+    const leadStatus = (l.status && l.status.trim()) ? l.status.trim() : 'Open';
     const matchStatus = !statusF || leadStatus === statusF;
     return matchSearch && matchCity && matchAlloc && matchPlat && matchStatus;
   });
@@ -256,12 +256,15 @@ function selectLead(id) {
   const lead = State.leads.find(l => l.id === id);
   if (!lead) return;
 
-  const sc = State.scoredMap[id] || State.scoredMap[String(id).trim()];
+  const sc = State.scoredMap[id] 
+          || State.scoredMap[String(id).trim()]
+          || State.scoredMap[lead.lead_id];  // ← extra fallback
+
   State.currentScores = sc ? { ...sc.scores } : {};
   State.currentFlags  = sc ? { ...sc.flags  } : {};
-  State.currentNotes  = sc ? (sc.notes || '') : '';
+  // Fallback to lead.notes if scoredMap miss
+  State.currentNotes  = (sc?.notes) || (lead?.notes) || '';
 
-  // Restore disposition if the lead had one
   if (sc && ['drop','info-requested','callback'].includes(sc.status)) {
     State.currentDisposition = sc.status;
   }
