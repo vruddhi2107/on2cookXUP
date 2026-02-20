@@ -178,6 +178,7 @@ function renderLeadGrid() {
             <th>Platform</th>
             <th>Status</th>
             <th>Score</th>
+            <th>Last Updated</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -197,6 +198,11 @@ function renderLeadGrid() {
                 <td><span class="plat-tag">${l.platform || 'FB'}</span></td>
                 <td><span class="badge" style="color:${st.color};border-color:${st.color}">${st.label}</span></td>
                 <td><b style="font-size:14px;color:${st.color}">${total ?? '—'}</b></td>
+                <td style="font-size:12px;color:var(--text-faint)">
+                  ${l.updated_at
+                    ? new Date(l.updated_at).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+                    : '—'}
+                </td>
                 <td><button class="icon-btn" onclick="selectLead('${l.id}')">Open Profile</button></td>
               </tr>`;
           }).join('')}
