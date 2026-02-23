@@ -11,7 +11,7 @@ const State = {
   currentScores:      {},
   currentFlags:       {},
   currentNotes:       '',
-  currentDisposition: null,   // NEW: 'drop' | 'info-requested' | 'callback' | null
+  currentDisposition: null,
   activeTab:          'leads',
 };
 
@@ -205,7 +205,6 @@ function renderLeadGrid() {
     </div>`;
 }
 
-// Unified badge helper (includes new dispositions)
 function getStatusBadge(status) {
   const map = {
     'fast-track':     { label: 'Fast Track',     color: '#16a34a' },
@@ -256,13 +255,12 @@ function selectLead(id) {
   const lead = State.leads.find(l => l.id === id);
   if (!lead) return;
 
-  const sc = State.scoredMap[id] 
+  const sc = State.scoredMap[id]
           || State.scoredMap[String(id).trim()]
-          || State.scoredMap[lead.lead_id];  // ← extra fallback
+          || State.scoredMap[lead.lead_id];
 
   State.currentScores = sc ? { ...sc.scores } : {};
   State.currentFlags  = sc ? { ...sc.flags  } : {};
-  // Fallback to lead.notes if scoredMap miss
   State.currentNotes  = (sc?.notes) || (lead?.notes) || '';
 
   if (sc && ['drop','info-requested','callback'].includes(sc.status)) {
@@ -329,7 +327,6 @@ function buildScoreFormHTML(lead) {
       </div>
     </div>
 
-    <!-- ── QUICK DISPOSITION BAR ── -->
     <div class="disposition-bar">
       <span class="disp-label">Quick Disposition:</span>
       ${Object.entries(dispConfig).map(([key, cfg]) => `
@@ -344,7 +341,6 @@ function buildScoreFormHTML(lead) {
       ${activeDisp ? `<button class="disp-btn disp-clear" onclick="clearDisposition()">✕ Clear</button>` : ''}
     </div>
 
-    <!-- ── DISPOSITION SAVE PANEL (shown when disposition selected) ── -->
     <div id="disp-panel" class="disp-panel" style="display:${activeDisp ? 'block' : 'none'}">
       <div class="disp-panel-inner" id="disp-panel-inner"
            style="border-color:${activeDisp ? dispConfig[activeDisp]?.color : '#333'}">
@@ -445,12 +441,10 @@ function selectDisposition(key) {
   };
   const cfg = dispConfig[key];
 
-  // Update button active states
   ['drop','info-requested','callback'].forEach(k => {
     document.getElementById(`disp-btn-${k}`)?.classList.toggle('active', k === key);
   });
 
-  // Add clear button if not already there
   if (!document.querySelector('.disp-clear')) {
     const bar = document.querySelector('.disposition-bar');
     const clearBtn = document.createElement('button');
@@ -461,11 +455,9 @@ function selectDisposition(key) {
   }
 
   if (key === 'info-requested') {
-    // ── INFO REQUESTED: hide notes-only panel, keep scoring active ──
     const dispPanel = document.getElementById('disp-panel');
     if (dispPanel) dispPanel.style.display = 'none';
 
-    // Show inline banner above scoring board
     const existing = document.getElementById('info-req-banner');
     if (!existing) {
       const board = document.querySelector('.scoring-board');
@@ -480,7 +472,6 @@ function selectDisposition(key) {
         board.insertBefore(banner, board.firstChild);
       }
     }
-    // Make caller-notes visually required
     const notesEl = document.getElementById('caller-notes');
     if (notesEl) {
       notesEl.placeholder = 'Required: What information was requested from the lead?';
@@ -489,7 +480,6 @@ function selectDisposition(key) {
     updateSummary();
 
   } else {
-    // ── DROP / CALLBACK: show notes-only panel, scoring not needed ──
     const existingBanner = document.getElementById('info-req-banner');
     if (existingBanner) existingBanner.remove();
 
@@ -500,7 +490,6 @@ function selectDisposition(key) {
     if (inner)     inner.style.borderColor = cfg.color;
     if (title)     { title.textContent = `${cfg.label} — Add Notes`; title.style.color = cfg.color; }
 
-    // Pre-fill notes textarea in the disp panel
     const dispNotesEl = document.getElementById('disp-notes');
     if (dispNotesEl) dispNotesEl.value = State.currentNotes || '';
 
@@ -515,14 +504,11 @@ function clearDisposition() {
   });
   document.querySelector('.disp-clear')?.remove();
 
-  // Hide notes-only panel
   const panel = document.getElementById('disp-panel');
   if (panel) panel.style.display = 'none';
 
-  // Remove info-requested banner
   document.getElementById('info-req-banner')?.remove();
 
-  // Reset caller-notes styling
   const notesEl = document.getElementById('caller-notes');
   if (notesEl) {
     notesEl.placeholder = 'Internal notes...';
@@ -576,7 +562,6 @@ async function saveDisposition() {
     time_commitment: lead.time_commitment,
     target_city:     lead.target_city,
     lead_alloc:      lead.lead_alloc,
-    // Keep existing scores/flags if any
     scores:          State.currentScores || {},
     flags:           State.currentFlags  || {},
     notes,
@@ -596,7 +581,6 @@ async function saveDisposition() {
       console.error('❌ SUPABASE ERROR:', error);
       showToast('Save failed: ' + error.message, 'error');
     } else {
-      console.log('✅ DISPOSITION SAVED:', data);
       State.scoredMap[State.currentLeadId] = payload;
       State.leads = State.leads.map(l =>
         l.id === State.currentLeadId ? { ...l, ...payload } : l
@@ -626,7 +610,6 @@ function restoreFormState() {
     if (cb) { cb.checked = true; label.classList.add('active'); }
   });
 
-  // Restore disposition panel if applicable
   if (State.currentDisposition) {
     selectDisposition(State.currentDisposition);
   }
@@ -693,7 +676,6 @@ function updateSummary() {
   const notesVal = (document.getElementById('caller-notes')?.value || '').trim();
 
   if (disp === 'info-requested') {
-    // Info Requested: all sections scored + notes mandatory, status from scores
     const notesOk = notesVal.length > 0;
     let notesErrEl = document.getElementById('info-req-notes-error');
 
@@ -723,7 +705,6 @@ function updateSummary() {
       if (notesErrEl) notesErrEl.style.display = 'none';
     }
   } else {
-    // Normal scoring — remove any info-req error element
     document.getElementById('info-req-notes-error')?.remove();
     if (allDone) {
       saveBtn.className   = 'save-btn ready';
@@ -746,7 +727,6 @@ async function saveLead() {
   const notes      = document.getElementById('caller-notes')?.value || '';
   const disp       = State.currentDisposition;
 
-  // Info Requested: enforce mandatory notes
   if (disp === 'info-requested' && !notes.trim()) {
     const notesEl = document.getElementById('caller-notes');
     if (notesEl) { notesEl.focus(); notesEl.style.borderColor = '#7c3aed'; }
@@ -765,9 +745,6 @@ async function saveLead() {
     return;
   }
 
-  // Determine final status:
-  // info-requested keeps its disposition label as status
-  // all others use score-calculated status
   const finalStatus = disp === 'info-requested' ? 'info-requested' : statusObj.key;
 
   const payload = {
@@ -805,7 +782,6 @@ async function saveLead() {
       console.error('❌ SUPABASE ERROR:', error);
       showToast('Save failed: ' + error.message, 'error');
     } else {
-      console.log('✅ SAVE SUCCESS:', data);
       State.scoredMap[State.currentLeadId] = payload;
       State.leads = State.leads.map(l =>
         l.id === State.currentLeadId ? { ...l, ...payload } : l
@@ -817,97 +793,6 @@ async function saveLead() {
     console.error('💥 CATCH ERROR:', err);
     showToast('Network error: ' + err.message, 'error');
   }
-}
-
-// ── DASHBOARD ──────────────────────────────────────────────────
-function renderDashboard() {
-  const panel = document.getElementById('content-panel');
-  if (!panel) return;
-
-  const scoredLeads = Object.values(State.scoredMap);
-  const totalLeads  = State.leads.length;
-
-  const getStatArray = (key) => {
-    const counts = {};
-    State.leads.forEach(l => {
-      const val = l[key] || 'Not Specified';
-      counts[val] = (counts[val] || 0) + 1;
-    });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  };
-
-  panel.innerHTML = `
-    <div class="dash-container">
-      <div class="dash-header">
-        <h2 class="dash-title">Operational Intelligence</h2>
-        <div class="kpi-strip">
-          <div class="kpi-stat"><span>Total Pipeline</span><b>${totalLeads}</b></div>
-          <div class="kpi-stat"><span>Processed</span><b>${scoredLeads.length}</b></div>
-          <div class="kpi-stat red"><span>Risk Flags</span><b>${scoredLeads.reduce((acc, l) => acc + (l.flag_count || 0), 0)}</b></div>
-        </div>
-      </div>
-      <div class="dash-grid">
-        <div class="dash-col">
-          <section class="dash-card">
-            <h3>Qualification Breakdown</h3>
-            ${renderProgressBar('Fast-Track',     scoredLeads.filter(l => l.status === 'fast-track').length,     scoredLeads.length, '#16a34a')}
-            ${renderProgressBar('Nurture',         scoredLeads.filter(l => l.status === 'nurture').length,         scoredLeads.length, '#d97706')}
-            ${renderProgressBar('Rejected',        scoredLeads.filter(l => ['auto-reject','not-suitable','rejected'].includes(l.status)).length, scoredLeads.length, '#dc2626')}
-            ${renderProgressBar('Dropped',         scoredLeads.filter(l => l.status === 'drop').length,            scoredLeads.length, '#6b7280')}
-            ${renderProgressBar('Info Requested',  scoredLeads.filter(l => l.status === 'info-requested').length,  scoredLeads.length, '#7c3aed')}
-            ${renderProgressBar('Call Back',       scoredLeads.filter(l => l.status === 'callback').length,        scoredLeads.length, '#0ea5e9')}
-          </section>
-          <section class="dash-card">
-            <h3>Team Member Load</h3>
-            <div class="stat-list">
-              ${getStatArray('lead_alloc').map(([n, c]) => `<div class="stat-row"><span>${n}</span><b>${c} leads</b></div>`).join('')}
-            </div>
-          </section>
-          <section class="dash-card">
-            <h3>Time Commitment</h3>
-            <div class="stat-list">
-              ${getStatArray('time_commitment').map(([n, c]) => `<div class="stat-row"><span>${n}</span><b>${c}</b></div>`).join('')}
-            </div>
-          </section>
-        </div>
-        <div class="dash-col">
-          <section class="dash-card">
-            <h3>Target Cities</h3>
-            <div class="stat-list">
-              ${getStatArray('target_city').slice(0, 8).map(([n, c]) => `<div class="stat-row"><span>${n}</span><b>${c}</b></div>`).join('')}
-            </div>
-          </section>
-          <section class="dash-card">
-            <h3>Score Averages by Section</h3>
-            <div class="stat-list">
-              ${SECTIONS.map(sec => {
-                const vals = scoredLeads.map(l => l.scores?.[sec.id]).filter(v => v != null);
-                const avg  = vals.length
-                  ? (vals.reduce((a, b) => Number(a) + Number(b), 0) / vals.length).toFixed(1)
-                  : '0.0';
-                return `<div class="stat-row"><span>${sec.title}</span><b style="color:var(--red)">${avg} / 5.0</b></div>`;
-              }).join('')}
-            </div>
-          </section>
-          <section class="dash-card">
-            <h3>Risk Factor</h3>
-            <div class="stat-list">
-              <div class="stat-row"><span>Flagged Leads</span><b style="color:#dc2626">${scoredLeads.filter(l => (l.flag_count||0) > 0).length}</b></div>
-              <div class="stat-row"><span>Clean Leads</span><b style="color:#16a34a">${scoredLeads.filter(l => (l.flag_count||0) === 0).length}</b></div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>`;
-}
-
-function renderProgressBar(label, value, total, color) {
-  const pct = total > 0 ? (value / total) * 100 : 0;
-  return `
-    <div class="progress-item">
-      <div class="progress-label"><span>${label}</span><b>${value}</b></div>
-      <div class="progress-bg"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
-    </div>`;
 }
 
 // ── EDIT FROM DASHBOARD ────────────────────────────────────────
