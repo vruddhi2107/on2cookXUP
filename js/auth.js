@@ -4,9 +4,9 @@
 
 // ── PASSWORD MAP ───────────────────────────────────────────────
 const TEAM_PASSWORDS = {
-  'master':          'OpenDoor2026',
-  'All Team Members':'OpenDoor2026',
-  'Unassigned':      'OpenDoor2026',
+  'master':          'Jyoti7andy!',
+  'All Team Members':'Jyoti7andy!',
+  'Unassigned':      'Jyoti7andy!',
   'Anil':            'GreenLeaf123',
   'Brijraj':         'SunnyDay123',
   'Chef Akshay':     'FreshFood123',
