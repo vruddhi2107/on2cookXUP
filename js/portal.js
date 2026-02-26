@@ -119,7 +119,7 @@ function populateFilters() {
   if (statusSel) {
     const statusOptions = [
       'Open', 'fast-track', 'nurture', 'auto-reject',
-      'not-suitable', 'rejected', 'drop', 'info-requested', 'callback'
+      'not-suitable', 'rejected', 'drop', 'info-requested', 'callback','age-disqualified'
     ];
     statusSel.innerHTML = '<option value="">All Status</option>' +
       statusOptions.map(s => `<option value="${s}">${formatStatusLabel(s)}</option>`).join('');
@@ -132,6 +132,7 @@ function formatStatusLabel(s) {
     'fast-track':     'Fast Track',
     'nurture':        'Nurture',
     'auto-reject':    'Auto Reject',
+    "age-disqualified": 'Age Disqualified',
     'not-suitable':   'Not Suitable',
     'rejected':       'Rejected',
     'drop':           'Dropped',
@@ -210,6 +211,7 @@ function getStatusBadge(status) {
     'fast-track':     { label: 'Fast Track',     color: '#16a34a' },
     'nurture':        { label: 'Nurture',         color: '#d97706' },
     'auto-reject':    { label: 'Auto Reject',     color: '#dc2626' },
+    'age-disqualified':    { label: 'Age Disqualified',     color: '#e2168a' },
     'not-suitable':   { label: 'Not Suitable',    color: '#dc2626' },
     'rejected':       { label: 'Rejected',        color: '#dc2626' },
     'drop':           { label: 'Dropped',         color: '#6b7280' },

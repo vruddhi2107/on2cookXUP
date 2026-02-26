@@ -28,6 +28,7 @@ function renderDashboard() {
   const dropped     = byStatus('drop');
   const infoReq     = byStatus('info-requested');
   const callbacks   = byStatus('callback');
+const ageDisqualified = byStatus('age-disqualified');
   const rejected    = all.filter(l => ['auto-reject','not-suitable','rejected'].includes(l.status)).length;
   const open        = all.filter(l => !l.status || l.status === 'Open' || l.status === "'Open'").length;
   const totalFlags  = all.reduce((a, l) => a + (l.flag_count || 0), 0);
@@ -74,8 +75,11 @@ function renderDashboard() {
     const drp      = memberLeads.filter(l => l.status === 'drop').length;
     const inf      = memberLeads.filter(l => l.status === 'info-requested').length;
     const cb       = memberLeads.filter(l => l.status === 'callback').length;
+    const ageDQ = memberLeads.filter(
+  l => l.status === 'age-disqualified'
+).length;
     const opn      = memberLeads.filter(l => !l.status || l.status === 'Open' || l.status === "'Open'").length;
-    return { member, memberTotal, ft, nur, rej, drp, inf, cb, opn };
+    return { member, memberTotal, ft, nur, rej, drp, inf, cb,ageDQ, opn };
   }).sort((a, b) => b.memberTotal - a.memberTotal);
 
   // ── Flag breakdown ────────────────────────────────────────────
@@ -115,7 +119,15 @@ function renderDashboard() {
         ${kpiCard('Total Pipeline',  total,            '',       '#fff',    'Σ', 'All leads in system')}
         ${kpiCard('Processed',       scored.length,    processRate+'%', '#d97706', '◎', 'Leads fully scored')}
         ${kpiCard('Fast Track',      fastTrack,        convRate+'%',   '#16a34a', '▲', 'Of total pipeline')}
-        ${kpiCard('Nurture',         nurture,          '',       '#f59e0b', '~', 'Needs follow-up')}
+${kpiCard(
+  'Age Disqualified',
+  ageDisqualified,
+  '',
+  '#e2168a',
+  '⛔',
+  'Outside eligible age range'
+)}      
+  ${kpiCard('Nurture',         nurture,          '',       '#f59e0b', '~', 'Needs follow-up')}
         ${kpiCard('Pending / Open',  open,             '',       '#6b7280', '○', 'Not yet reviewed')}
         ${kpiCard('Avg Score',       avgScore+'pts',   '',       '#0ea5e9', '◈', 'Across scored leads')}
         ${kpiCard('Risk Flags',      totalFlags,       '',       '#dc2626', '⚑', 'Total flags raised')}
@@ -135,6 +147,7 @@ function renderDashboard() {
             ${statusBar('Fast Track',    fastTrack,   total, '#16a34a')}
             ${statusBar('Nurture',       nurture,     total, '#d97706')}
             ${statusBar('Open',          open,        total, '#6b7280')}
+            ${statusBar('Age Disqualified', ageDisqualified, total, '#e2168a')}
             ${statusBar('Info Req.',     infoReq,     total, '#7c3aed')}
             ${statusBar('Call Back',     callbacks,   total, '#0ea5e9')}
             ${statusBar('Dropped',       dropped,     total, '#374151')}
@@ -347,6 +360,7 @@ function renderDashboard() {
                 <th class="db-tm-th db-tm-sortable" data-col="drp"         onclick="sortTeamTable('drp')">Dropped <span class="db-tm-sort-icon">↕</span></th>
                 <th class="db-tm-th db-tm-sortable" data-col="inf"         onclick="sortTeamTable('inf')">Info Requested <span class="db-tm-sort-icon">↕</span></th>
                 <th class="db-tm-th db-tm-sortable" data-col="cb"          onclick="sortTeamTable('cb')">Call Back <span class="db-tm-sort-icon">↕</span></th>
+                <th class="db-tm-th db-tm-sortable" data-col="ageDQ" onclick="sortTeamTable('ageDQ')"> Age Disqualified <span class="db-tm-sort-icon">↕</span></th>
                 <th class="db-tm-th db-tm-sortable" data-col="opn"         onclick="sortTeamTable('opn')">Open <span class="db-tm-sort-icon">↕</span></th>
               </tr>
             </thead>
@@ -357,7 +371,7 @@ function renderDashboard() {
               <tr class="db-tm-total-row">
                 <td class="db-tm-td db-tm-member-cell" style="color:#888;font-weight:700;font-size:11px;letter-spacing:0.08em">TOTAL</td>
                 <td class="db-tm-td"><span class="db-tm-total-num">${total}</span></td>
-                ${[fastTrack, nurture, rejected, dropped, infoReq, callbacks, open].map((v,i) => {
+                ${[fastTrack, nurture, rejected, dropped, infoReq, callbacks,ageDisqualified, open].map((v,i) => {
                   const colors = ['#16a34a','#d97706','#dc2626','#6b7280','#7c3aed','#0ea5e9','#4b5563'];
                   return `<td class="db-tm-td"><span class="db-tm-num" style="color:${colors[i]}">${v}</span><div class="db-tm-pct">${total>0?Math.round((v/total)*100):0}%</div></td>`;
                 }).join('')}
@@ -371,14 +385,16 @@ function renderDashboard() {
 
   // ── Render Charts ────────────────────────────────────────────
   requestAnimationFrame(() => {
-    renderStatusDonut({ fastTrack, nurture, open, infoReq, callbacks, dropped, rejected });
+  renderStatusDonut({
+    fastTrack, nurture, open, infoReq, callbacks, dropped, rejected, ageDisqualified
+  });
     renderSectionBar(secAverages);
     renderPlatformChart(platData);
   });
 }
 
 // ── CHART RENDERERS ──────────────────────────────────────────────
-function renderStatusDonut({ fastTrack, nurture, open, infoReq, callbacks, dropped, rejected }) {
+function renderStatusDonut({ fastTrack, nurture, open, infoReq, callbacks, dropped, rejected, ageDisqualified }) {
   const ctx = document.getElementById('chart-status-donut');
   if (!ctx) return;
 
@@ -388,6 +404,7 @@ function renderStatusDonut({ fastTrack, nurture, open, infoReq, callbacks, dropp
     { label: 'Open',          value: open,       color: '#4b5563' },
     { label: 'Info Req.',     value: infoReq,    color: '#7c3aed' },
     { label: 'Call Back',     value: callbacks,  color: '#0ea5e9' },
+    { label: 'Age Disqualified', value: ageDisqualified, color: '#e2168a' },
     { label: 'Dropped',       value: dropped,    color: '#1f2937' },
     { label: 'Rejected',      value: rejected,   color: '#dc2626' },
   ].filter(d => d.value > 0);
@@ -446,7 +463,7 @@ function renderSectionBar(secAverages) {
 function renderPlatformChart(platData) {
   const ctx = document.getElementById('chart-platform');
   if (!ctx) return;
-  const colors = ['#dc2626','#0ea5e9','#d97706','#16a34a','#7c3aed','#f43f5e'];
+  const colors = ['#dc2626','#0ea5e9','#d97706','#16a34a','#7c3aed','#f43f5e','#eab308','#14b8a6','#f59e0b','#6b7280'];
   _charts['platform'] = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -521,6 +538,7 @@ function teamMemberRow(r) {
       ${cell(r.drp, '#6b7280')}
       ${cell(r.inf, '#7c3aed')}
       ${cell(r.cb,  '#0ea5e9')}
+      ${cell(r.ageDQ, '#e2168a')}
       ${cell(r.opn, '#4b5563')}
     </tr>`;
 }
@@ -542,6 +560,7 @@ function sortTeamTable(col) {
       drp: ml.filter(l => l.status === 'drop').length,
       inf: ml.filter(l => l.status === 'info-requested').length,
       cb:  ml.filter(l => l.status === 'callback').length,
+      ageDQ: ml.filter(l => l.status === 'age-disqualified').length,
       opn: ml.filter(l => !l.status || l.status === 'Open' || l.status === "'Open'").length,
     };
   });
