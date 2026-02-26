@@ -4,8 +4,8 @@
 
 // ── PASSWORD MAP ───────────────────────────────────────────────
 const TEAM_PASSWORDS = {
-  'master':          'BlueSky2026',
-  'All Team Members':'HappyWork2026',
+  'master':          'OpenDoor2026',
+  'All Team Members':'OpenDoor2026',
   'Unassigned':      'OpenDoor2026',
   'Anil':            'GreenLeaf123',
   'Brijraj':         'SunnyDay123',
