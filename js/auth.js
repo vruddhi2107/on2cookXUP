@@ -25,34 +25,35 @@ const TEAM_PASSWORDS = {
   'Suruti':          'SoftCloud123',
   'Tejas':           'QuickStep123',
   'Vanshika':        'StarShine123',
-  'Vruddhi':         'GrowHigher123'
-}
+  'Vruddhi':         'GrowHigher123',
+};
 
 // ── SESSION STATE ──────────────────────────────────────────────
 const _authUnlocked    = new Set();
-let _authLastGoodAlloc = null;   // null = never authed this session
+let _authLastGoodAlloc = null;
 let _pendingAllocValue = null;
 let _onAuthSuccess     = null;
 let _onAuthCancel      = null;
 
-// ── CACHED DOM REFS (populated once modal is built) ────────────
+// ── CACHED DOM REFS ────────────────────────────────────────────
 let _authEls = null;
 
-// ── BUILD MODAL (always deferred to DOMContentLoaded) ──────────
+// ── BUILD MODAL ────────────────────────────────────────────────
 function _buildModal() {
-  // Already built
   if (_authEls) return;
 
   const overlay = document.createElement('div');
   overlay.id        = 'auth-overlay';
   overlay.className = 'auth-overlay';
+
+  // Build with a STABLE structure — no innerHTML will ever replace these nodes
   overlay.innerHTML = `
-    <div class="auth-card" id="auth-card">
+    <div class="auth-card">
       <div class="auth-icon">🔒</div>
-      <div class="auth-title">Restricted Access</div>
-      <p class="auth-sub">Enter the password to access <b class="auth-name-label">this view</b></p>
+      <div class="auth-title"></div>
+      <p class="auth-sub-static">Enter the password to access <b class="auth-name-label"></b>'s leads.</p>
       <div class="auth-input-wrap">
-        <input class="auth-input" type="password" placeholder="Enter password" autocomplete="off" />
+        <input class="auth-input" type="password" placeholder="Enter password" autocomplete="new-password" />
         <span class="auth-eye">👁</span>
       </div>
       <div class="auth-error">⚠ Incorrect password. Try again.</div>
@@ -62,33 +63,31 @@ function _buildModal() {
 
   document.body.appendChild(overlay);
 
-  // Cache every reference we'll ever need — no getElementById later
-  const card     = overlay.querySelector('.auth-card');
+  // Cache refs once — these elements are NEVER removed or replaced
   _authEls = {
     overlay,
-    title:    overlay.querySelector('.auth-title'),
-    sub:      overlay.querySelector('.auth-sub'),
-    nameEl:   overlay.querySelector('.auth-name-label'),
-    input:    overlay.querySelector('.auth-input'),
-    eye:      overlay.querySelector('.auth-eye'),
-    error:    overlay.querySelector('.auth-error'),
-    btn:      overlay.querySelector('.auth-btn'),
-    cancel:   overlay.querySelector('.auth-cancel'),
+    title:  overlay.querySelector('.auth-title'),
+    nameEl: overlay.querySelector('.auth-name-label'),  // only .textContent is ever set
+    input:  overlay.querySelector('.auth-input'),
+    eye:    overlay.querySelector('.auth-eye'),
+    error:  overlay.querySelector('.auth-error'),
+    btn:    overlay.querySelector('.auth-btn'),
+    cancel: overlay.querySelector('.auth-cancel'),
   };
 
-  // Wire events via cached refs — no inline handlers
-  _authEls.btn.addEventListener('click',    _authSubmit);
-  _authEls.cancel.addEventListener('click', _authCancel);
-  _authEls.eye.addEventListener('click',    _authToggleEye);
+  // Wire events once
+  _authEls.btn.addEventListener('click',     _authSubmit);
+  _authEls.cancel.addEventListener('click',  _authCancel);
+  _authEls.eye.addEventListener('click',     _authToggleEye);
   _authEls.input.addEventListener('keydown', e => { if (e.key === 'Enter') _authSubmit(); });
   overlay.addEventListener('click', e => { if (e.target === overlay) _authCancel(); });
 }
 
-// Always build after DOM is ready — no race condition
 document.addEventListener('DOMContentLoaded', _buildModal);
 
-// ── PUBLIC: gate the alloc filter ─────────────────────────────
+// ── PUBLIC API ─────────────────────────────────────────────────
 function requireAuthForAlloc(allocValue, onSuccess, onCancel) {
+  // Already unlocked?
   if (_authUnlocked.has('master'))   { onSuccess(); return; }
   if (_authUnlocked.has(allocValue)) { onSuccess(); return; }
 
@@ -96,16 +95,18 @@ function requireAuthForAlloc(allocValue, onSuccess, onCancel) {
   _onAuthSuccess     = onSuccess;
   _onAuthCancel      = onCancel || null;
 
-  // If somehow called before DOMContentLoaded (shouldn't happen but safe)
-  if (!_authEls) { _buildModal(); }
-  if (!_authEls) { console.error('[auth] Modal could not be built'); return; }
+  if (!_authEls) _buildModal();
+  if (!_authEls) { console.error('[auth] Modal build failed'); return; }
 
   const displayName = allocValue || 'All Team Members';
+
+  // Update only .textContent — never touch innerHTML so refs stay valid
   _authEls.title.textContent  = allocValue ? `${displayName}'s View` : 'Full Team View';
   _authEls.nameEl.textContent = displayName;
-  _authEls.sub.innerHTML      = `Enter the password to access <b class="auth-name-label">${displayName}</b>'s leads.`;
-  _authEls.input.value        = '';
-  _authEls.input.type         = 'password';
+
+  // Reset input & error
+  _authEls.input.value = '';
+  _authEls.input.type  = 'password';
   _authEls.input.classList.remove('error');
   _authEls.error.classList.remove('show');
 
@@ -113,24 +114,29 @@ function requireAuthForAlloc(allocValue, onSuccess, onCancel) {
   setTimeout(() => _authEls.input.focus(), 80);
 }
 
-// ── SUBMIT ────────────────────────────────────────────────────
+// ── SUBMIT ─────────────────────────────────────────────────────
 function _authSubmit() {
   if (!_authEls) return;
-  const entered  = _authEls.input.value.trim();
-  const allocVal = _pendingAllocValue;
 
-  const isMasterPw = entered === TEAM_PASSWORDS['master'];
-  const isOwnPw    = allocVal && entered === TEAM_PASSWORDS[allocVal];
-  const valid      = (allocVal === '' || allocVal === null) ? isMasterPw : (isMasterPw || isOwnPw);
+  const entered  = _authEls.input.value.trim();
+  const allocVal = _pendingAllocValue;          // "" = All Team, null = never set
+
+  const masterPw  = TEAM_PASSWORDS['master'];
+  const isMaster  = entered === masterPw;
+  const isOwnPw   = !!allocVal && (entered === TEAM_PASSWORDS[allocVal]);
+
+  // "All Team Members" (allocVal === '' or null) — master only
+  // Individual name — own password OR master
+  const valid = (!allocVal) ? isMaster : (isMaster || isOwnPw);
 
   if (valid) {
-    if (isMasterPw) _authUnlocked.add('master');
-    else            _authUnlocked.add(allocVal);
+    if (isMaster) _authUnlocked.add('master');
+    else          _authUnlocked.add(allocVal);
 
     _authLastGoodAlloc = allocVal;
     _authEls.overlay.classList.remove('visible');
 
-    const cb = _onAuthSuccess;
+    const cb       = _onAuthSuccess;
     _pendingAllocValue = null;
     _onAuthSuccess     = null;
     _onAuthCancel      = null;
@@ -145,22 +151,21 @@ function _authSubmit() {
   }
 }
 
-// ── CANCEL ────────────────────────────────────────────────────
+// ── CANCEL ─────────────────────────────────────────────────────
 function _authCancel() {
   if (_authEls) _authEls.overlay.classList.remove('visible');
 
-  // Revert the dropdown
   const sel = document.getElementById('filter-alloc');
   if (sel) sel.value = _authLastGoodAlloc ?? '';
 
-  const cb = _onAuthCancel;
+  const cb       = _onAuthCancel;
   _pendingAllocValue = null;
   _onAuthSuccess     = null;
   _onAuthCancel      = null;
   if (cb) cb();
 }
 
-// ── TOGGLE EYE ────────────────────────────────────────────────
+// ── TOGGLE EYE ─────────────────────────────────────────────────
 function _authToggleEye() {
   if (!_authEls) return;
   _authEls.input.type = (_authEls.input.type === 'password') ? 'text' : 'password';
