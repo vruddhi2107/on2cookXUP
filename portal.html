@@ -61,19 +61,26 @@
 
    <div class="full-width-container">
     <div class="grid-controls">
-        <input type="text" id="search-input" placeholder="Search leads..." oninput="renderLeadGrid()">
+
+    <!-- 👤 Always visible -->
+    <select id="filter-alloc">
+      <option value="">All Team Members</option>
+    </select>
+
+    <!-- 🔒 Hidden until auth success -->
+    <div id="secondary-filters" style="display:none; gap:10px; align-items:center;">
+        <input type="text" id="search-input"
+               placeholder="Search leads..."
+               oninput="renderLeadGrid()">
+
         <select id="filter-city" onchange="renderLeadGrid()">
           <option value="">All Cities</option>
-        </select>
-
-        <!-- Team member filter — gated by auth.js -->
-        <select id="filter-alloc">
-          <option value="">All Team Members</option>
         </select>
 
         <select id="filter-platform" onchange="renderLeadGrid()">
           <option value="">All Platforms</option>
         </select>
+
         <select id="filter-status" onchange="renderLeadGrid()">
           <option value="">All Status</option>
           <option value="Open">Open</option>
@@ -84,8 +91,11 @@
           <option value="not-suitable">Not Suitable</option>
           <option value="rejected">Rejected</option>
         </select>
+
         <div id="leads-meta" class="meta-count"></div>
-      </div>
+    </div>
+
+</div>
 
     <!-- ── CONTENT PANEL ── -->
     <div class="content-panel" id="content-panel">

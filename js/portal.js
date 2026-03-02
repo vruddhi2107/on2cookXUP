@@ -72,10 +72,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       requireAuthForAlloc(
         chosen,
-        function onSuccess() { renderLeadGrid(); },
-        function onCancel()  {
-          if (_authLastGoodAlloc === null) renderLockedState();
-        }
+        function onSuccess() {
+          showSecondaryFilters();  
+          renderLeadGrid();
+        },
       );
     });
   }
@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── LOCKED PLACEHOLDER ─────────────────────────────────────────
 function renderLockedState() {
+    hideSecondaryFilters(); 
   const panel = document.getElementById('content-panel');
   if (!panel) return;
   panel.innerHTML = `
@@ -715,4 +716,13 @@ function showToast(msg, type='info') {
   const t=document.getElementById('toast'); if(!t) return;
   t.textContent=msg; t.className=`toast ${type==='success'?'success':''} show`;
   clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+function showSecondaryFilters() {
+  const el = document.getElementById('secondary-filters');
+  if (el) el.style.display = 'flex';
+}
+
+function hideSecondaryFilters() {
+  const el = document.getElementById('secondary-filters');
+  if (el) el.style.display = 'none';
 }
