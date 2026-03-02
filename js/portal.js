@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   setSyncStatus('Loading...');
-  await loadScoredFromDB();
+  // await loadScoredFromDB();
   await loadLeads();
 
   // Show locked placeholder — user must select their name first
@@ -127,6 +127,9 @@ async function loadLeads() {
     }
 
     State.leads = allData.map(row => ({ ...row, id: row.lead_id }));
+    State.scoredMap = Object.fromEntries(
+      State.leads.map(l => [String(l.id), l])
+    );
     setSyncStatus(`Synced · ${State.leads.length} leads`);
     populateFilters();
 
@@ -272,7 +275,7 @@ function switchTab(tab) {
 
 // ── REFRESH ────────────────────────────────────────────────────
 async function refreshAll() {
-  await loadScoredFromDB();
+  // await loadScoredFromDB();
   await loadLeads();
   if (State.activeTab === 'dashboard') renderDashboard();
   else if (_authLastGoodAlloc !== null) renderLeadGrid();
@@ -285,9 +288,8 @@ function selectLead(id) {
   const lead = State.leads.find(l => l.id === id);
   if (!lead) return;
 
-  const sc = State.scoredMap[id]
-          || State.scoredMap[String(id).trim()]
-          || State.scoredMap[lead.lead_id];
+  id = String(id).trim();
+const sc = State.scoredMap[id];
 
   State.currentScores = sc ? { ...sc.scores } : {};
   State.currentFlags  = sc ? { ...sc.flags  } : {};
