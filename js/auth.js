@@ -26,6 +26,10 @@ const TEAM_PASSWORDS = {
   'Tejas':           'QuickStep123',
   'Vanshika':        'StarShine123',
   'Vruddhi':         'GrowHigher123',
+  'Pawan':            'BraveSoul123',
+  'Tulsi':            'BrightSun123',
+  'Bhavith':           'HappyDay123',
+  'Sharv':            'CalmSea123',
 };
 
 // ── SESSION STATE ──────────────────────────────────────────────
