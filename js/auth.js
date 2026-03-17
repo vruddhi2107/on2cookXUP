@@ -13,7 +13,7 @@ const TEAM_PASSWORDS = {
   'Chef Mandeep':    'HotKitchen123',
   'Chef Rishi':      'TastyMeal123',
   'Hardik':          'FastRunner123',
-  'Hardik Patel':    'SmartWorker123',
+  'Hardik Patel':    '123456789',
   'Himanshu':        'BrightLight123',
   'Mary':            'SweetHome123',
   'Neha':            'CalmRiver123',
