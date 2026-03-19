@@ -10,7 +10,8 @@
           "js/**",
           "assets/**",
           "index.html",
-          "portal.html"
+          "portal.html",
+          "report.html"
         ]
       }
     }
